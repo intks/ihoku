@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, withFilter } from 'vite'
 import { preserveDirectives } from 'rollup-plugin-preserve-directives'
 import dts from 'vite-plugin-dts'
 
@@ -15,8 +15,10 @@ export default defineConfig(({ command }) => {
   const isLibrary = command === 'build'
 
   if (isLibrary) {
-    // Library build configuration
     return {
+      experimental: {
+        enableNativePlugin: true,
+      },
       plugins: [
         react(),
         dts({
@@ -31,22 +33,31 @@ export default defineConfig(({ command }) => {
           entry: ['src/index.ts'],
           formats: ['es'],
         },
-        rollupOptions: {
+        rolldownOptions: {
           external: ['react', 'react-dom', 'lodash', 'lodash-es', 'react/jsx-runtime', ...Object.keys(globals)],
           output: {
             preserveModules: true,
             preserveModulesRoot: 'src',
             entryFileNames: '[name].js',
           },
-          plugins: [preserveDirectives({})],
+
+          plugins: [
+            withFilter(
+              preserveDirectives({}),
+
+              { load: { id: /\.tsx?$/ } }
+            ),
+          ],
         },
         copyPublicDir: false,
       },
     }
   }
 
-  // Development playground configuration
   return {
+    experimental: {
+      enableNativePlugin: true,
+    },
     plugins: [react()],
   }
 })

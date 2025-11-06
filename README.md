@@ -18,69 +18,30 @@ pnpm add @intks/hooks
 
 ```typescript
 // Import all hooks from the main entry
-import { useCounter, useToggle } from '@intks/hooks'
+import { useDisclosure } from '@intks/hooks'
 
 // Or import individual hooks
-import { useCounter } from '@intks/hooks/useCounter'
-import { useToggle } from '@intks/hooks/useToggle'
+import { useDisclosure } from '@intks/hooks/useDisclosure'
 ```
 
 ## Hooks
 
-### `useCounter`
+### `useDisclosure`
 
-A hook for managing a counter state with increment, decrement, reset, and set functionality.
-
-```typescript
-import { useCounter } from '@intks/hooks'
-
-const MyComponent = () => {
-  const [count, { increment, decrement, reset, set }] = useCounter(0)
-
-  return (
-    <div>
-      <p>Count: {count}</p>
-      <button onClick={increment}>Increment</button>
-      <button onClick={decrement}>Decrement</button>
-      <button onClick={reset}>Reset</button>
-      <button onClick={() => set(10)}>Set to 10</button>
-    </div>
-  )
-}
-```
-
-#### API
-
-- **Parameters:**
-  - `initialValue` (optional): The initial counter value. Defaults to `0`.
-
-- **Returns:**
-  - `[count, actions]` - A tuple containing:
-    - `count`: The current counter value
-    - `actions`: An object with the following methods:
-      - `increment()`: Increments the counter by 1
-      - `decrement()`: Decrements the counter by 1
-      - `reset()`: Resets the counter to the initial value
-      - `set(value)`: Sets the counter to a specific value
-
----
-
-### `useToggle`
-
-A hook for managing boolean state with toggle, setTrue, and setFalse functionality.
+A hook for managing a boolean state with open, close, and toggle functionality.
 
 ```typescript
-import { useToggle } from '@intks/hooks'
+import { useDisclosure } from '@intks/hooks'
 
 const MyComponent = () => {
-  const [isOpen, { toggle, setTrue, setFalse }] = useToggle(false)
+  const { isOpen, open, close, toggle } = useDisclosure()
 
   return (
     <div>
       <p>Modal is {isOpen ? 'open' : 'closed'}</p>
+      <button onClick={open}>Open</button>
+      <button onClick={close}>Close</button>
       <button onClick={toggle}>Toggle</button>
-      <button onClick={setTrue}>Open</button>
-      <button onClick={setFalse}>Close</button>
     </div>
   )
 }
@@ -88,16 +49,18 @@ const MyComponent = () => {
 
 #### API
 
-- **Parameters:**
-  - `initialValue` (optional): The initial boolean value. Defaults to `false`.
+- **Options:**
+  - `isOpen` (optional): The initial boolean value. Defaults to `false`.
+  - `onOpen` (optional): A callback function to be called when the modal is opened.
+  - `onClose` (optional): A callback function to be called when the modal is closed.
 
 - **Returns:**
-  - `[value, actions]` - A tuple containing:
-    - `value`: The current boolean value
-    - `actions`: An object with the following methods:
-      - `toggle()`: Toggles the boolean value
-      - `setTrue()`: Sets the value to `true`
-      - `setFalse()`: Sets the value to `false`
+  - `isOpen`: The current boolean value
+  - `open()`: A function to open the modal
+  - `close()`: A function to close the modal
+  - `toggle()`: A function to toggle the modal
+
+---
 
 ## Development
 

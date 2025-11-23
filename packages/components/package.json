@@ -1,0 +1,55 @@
+{
+  "name": "@intks/ihoku-components",
+  "version": "0.0.1",
+  "private": false,
+  "author": {
+    "name": "intks",
+    "email": "shift1255@gmail.com"
+  },
+  "description": "A collection of useful React components for your projects.",
+  "keywords": [
+    "react-components"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@intks/ihoku-eslint-config": "*",
+    "@mui/material": "^7.3.5"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "5.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "vite": "7.2.1",
+    "vite-plugin-dts": "4.5.4"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

@@ -1,7 +1,8 @@
 {
   "files": [],
   "references": [
-    { "path": "./packages/ihoku/tsconfig.json" },
+    { "path": "./packages/hooks/tsconfig.json" },
+    { "path": "./packages/components/tsconfig.json" },
     { "path": "./apps/docs/tsconfig.json" }
   ]
 }

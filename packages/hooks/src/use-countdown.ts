@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, Dispatch, SetStateAction } from 'react'
+import type { Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, useCallback } from 'react'
 
-type UseCountdownDateReturn = {
+interface UseCountdownDateReturn {
   days: string
   hours: string
   minutes: string
@@ -51,7 +52,7 @@ export const useCountdownDate = (targetDate: Date, placeholder = '- -'): UseCoun
   return value
 }
 
-type UseCountdownSecondsReturn = {
+interface UseCountdownSecondsReturn {
   value: number
   start: () => void
   reset: () => void

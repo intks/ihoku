@@ -1,6 +1,7 @@
 import { useMemo, useState, useCallback } from 'react'
 
-type UseCopyReturn = {
+
+interface UseCopyReturn {
   copy: CopyFn
   copiedText: CopiedValue
 }
@@ -29,7 +30,7 @@ const useCopy = (): UseCopyReturn => {
         return false
       }
     },
-    [setCopiedText]
+    []
   )
 
   const memoizedValue = useMemo(() => ({ copy, copiedText }), [copy, copiedText])

@@ -1,5 +1,5 @@
 {
-  "name": "@intks/ihoku",
+  "name": "@intks/ihoku-hooks",
   "version": "0.0.1",
   "private": false,
   "author": {
@@ -30,6 +30,9 @@
   "scripts": {
     "build": "vite build"
   },
+  "dependencies": {
+    "@intks/ihoku-eslint-config": "*"
+  },
   "peerDependencies": {
     "react": ">=18"
   },
@@ -38,7 +41,9 @@
     "react-dom": "^18.2.0",
     "@vitejs/plugin-react": "5.1.0",
     "vite-plugin-dts": "4.5.4",
-    "vite": "7.2.1"
+    "vite": "7.2.1",
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22"
   },
   "engines": {
     "node": ">=20"

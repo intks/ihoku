@@ -1,6 +1,11 @@
 # useDisclosure
 
-A hook to manage a boolean toggle state.
+The `useDisclosure` hook is designed to provide an easy and efficient way to handle the open/close state of components such as modals, accordions, dropdowns, and more in React applications. It encapsulates common logic for toggling visibility and offers an API that's simple to integrate and flexible enough to accommodate various use cases.
+
+1. **State Management**: Manage the open/close state internally, providing a straightforward way to toggle this state.
+2. **External Control**: Accept an optional `isOpen` prop, allowing external control over the component's visibility. This is particularly useful for scenarios where the open/close state needs to be synchronized with external data or events.
+3. **Lifecycle Callbacks**: Offer optional `onOpen` and `onClose` callback props, which are invoked when the component is opened or closed, respectively. This allows for custom actions to be executed in response to these state changes.
+4. **Optimized Rendering**: Utilize useCallback to optimize performance, reducing unnecessary re-renders and ensuring stability of the hook's API across renders.
 
 ## API
 
@@ -17,19 +22,14 @@ const { isOpen, open, close, toggle } = useDisclosure(options)
 ```tsx
 import { useDisclosure } from '@intks/ihoku'
 
-export default function Demo() {
-  const { isOpen, open, close, toggle } = useDisclosure({
-    onOpen: () => console.log('opened'),
-    onClose: () => console.log('closed'),
-  })
+const Example = () => {
+  const { isOpen, onOpen, onToggle } = useDisclosure()
 
   return (
-    <div>
-      <button onClick={open}>Open</button>
-      <button onClick={close}>Close</button>
-      <button onClick={toggle}>Toggle</button>
-      <p>isOpen: {String(isOpen)}</p>
-    </div>
+    <>
+      <button onClick={onToggle}>Toggle</button>
+      {isOpen && <div>Content</div>}
+    </>
   )
 }
 ```

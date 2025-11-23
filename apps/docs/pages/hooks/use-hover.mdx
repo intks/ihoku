@@ -1,0 +1,31 @@
+# useHover
+
+TBD
+
+## API
+
+```ts
+const { ref, isHover } = useHover(delay)
+```
+
+- **delay**: delay time
+
+## Example
+
+```tsx
+import { useHover } from '@intks/ihoku'
+
+const Example = () => {
+  const { ref, isHover } = useHover()
+
+  const backgroundColor = isHover ? `#F24` : '#fff'
+
+  return (
+    <section>
+      <article ref={ref} style={{ backgroundColor }}>
+        isHover? {isHover ? 'Yes' : 'No'}
+      </article>
+    </section>
+  )
+}
+```

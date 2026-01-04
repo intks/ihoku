@@ -1,0 +1,59 @@
+# useMap
+
+A hook to manage a Map data structure with convenient methods. Useful for managing key-value pairs with better performance than objects for frequent additions/deletions.
+
+## Import
+
+```ts
+import { useMap } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useMap<K, V>(initialMap?: Map<K, V>): UseMapReturn<K, V>
+```
+
+**Parameters**
+
+- **initialMap**: `Map<K, V>` - Optional. Initial map value (default: `new Map()`).
+
+**Returns**
+
+- Returns a `UseMapReturn<K, V>` object:
+  - **map**: `Map<K, V>` - The current map.
+  - **set**: `(key: K, value: V) => void` - Set a key-value pair.
+  - **get**: `(key: K) => V | undefined` - Get value by key.
+  - **has**: `(key: K) => boolean` - Check if key exists.
+  - **remove**: `(key: K) => void` - Remove a key-value pair.
+  - **clear**: `() => void` - Clear all entries.
+  - **reset**: `() => void` - Reset to initial map.
+  - **size**: `number` - Number of entries.
+
+## Example
+
+```tsx
+import { useMap } from '@intks/ihoku'
+
+const Example = () => {
+  const { map, set, get, remove, clear, size } = useMap<string, number>()
+
+  return (
+    <div>
+      <p>Map size: {size}</p>
+      <button onClick={() => set('key1', 100)}>Set key1 = 100</button>
+      <button onClick={() => set('key2', 200)}>Set key2 = 200</button>
+      <button onClick={() => remove('key1')}>Remove key1</button>
+      <button onClick={clear}>Clear All</button>
+      <div>
+        {Array.from(map.entries()).map(([key, value]) => (
+          <div key={key}>
+            {key}: {value}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+```
+

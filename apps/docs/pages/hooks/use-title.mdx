@@ -1,0 +1,43 @@
+# useTitle
+
+A hook to dynamically set the document title. Automatically restores the previous title when the component unmounts.
+
+## Import
+
+```ts
+import { useTitle } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useTitle(title: string): void
+```
+
+**Parameters**
+
+- **title**: `string` - Required. The document title to set.
+
+**Returns**
+
+- Returns `void`.
+
+## Example
+
+```tsx
+import { useState } from 'react'
+import { useTitle } from '@intks/ihoku'
+
+const Example = () => {
+  const [count, setCount] = useState(0)
+  useTitle(`Count: ${count}`)
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  )
+}
+```
+

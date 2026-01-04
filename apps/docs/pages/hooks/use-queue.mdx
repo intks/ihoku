@@ -1,0 +1,54 @@
+# useQueue
+
+A hook to manage a queue (FIFO - First In First Out) data structure. Useful for managing task queues, message queues, or any sequential processing.
+
+## Import
+
+```ts
+import { useQueue } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useQueue<T>(initialQueue?: T[]): UseQueueReturn<T>
+```
+
+**Parameters**
+
+- **initialQueue**: `T[]` - Optional. Initial queue items (default: `[]`).
+
+**Returns**
+
+- Returns a `UseQueueReturn<T>` object:
+  - **queue**: `T[]` - The current queue array.
+  - **enqueue**: `(item: T) => void` - Add an item to the end of the queue.
+  - **dequeue**: `() => T | undefined` - Remove and return the first item from the queue.
+  - **peek**: `() => T | undefined` - Get the first item without removing it.
+  - **clear**: `() => void` - Clear all items.
+  - **size**: `number` - Number of items in the queue.
+
+## Example
+
+```tsx
+import { useQueue } from '@intks/ihoku'
+
+const Example = () => {
+  const { queue, enqueue, dequeue, peek, size } = useQueue<number>()
+
+  return (
+    <div>
+      <p>Queue size: {size}</p>
+      <p>Next item: {peek() ?? 'None'}</p>
+      <button onClick={() => enqueue(Math.random())}>Enqueue</button>
+      <button onClick={() => dequeue()}>Dequeue</button>
+      <div>
+        {queue.map((item, index) => (
+          <div key={index}>{item}</div>
+        ))}
+      </div>
+    </div>
+  )
+}
+```
+

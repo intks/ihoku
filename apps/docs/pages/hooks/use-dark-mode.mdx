@@ -1,0 +1,46 @@
+# useDarkMode
+
+A hook to manage dark mode state with automatic localStorage persistence and DOM class management. Automatically detects system preference on first load.
+
+## Import
+
+```ts
+import { useDarkMode } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useDarkMode(options?: UseDarkModeOptions): [boolean, () => void]
+```
+
+**Parameters**
+
+- **options.initialValue**: `boolean` - Optional. Initial dark mode value.
+- **options.storageKey**: `string` - Optional. localStorage key to store the preference (default: `'darkMode'`).
+
+**Returns**
+
+- Returns a tuple `[isDark, toggle]`:
+  - **isDark**: `boolean` - Whether dark mode is enabled.
+  - **toggle**: `() => void` - Function to toggle dark mode.
+
+## Example
+
+```tsx
+import { useDarkMode } from '@intks/ihoku'
+
+const Example = () => {
+  const [isDark, toggle] = useDarkMode()
+
+  return (
+    <div>
+      <button onClick={toggle}>
+        {isDark ? '☀️ Light Mode' : '🌙 Dark Mode'}
+      </button>
+      <p>Current mode: {isDark ? 'Dark' : 'Light'}</p>
+    </div>
+  )
+}
+```
+

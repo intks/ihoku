@@ -1,0 +1,37 @@
+# useWindowFocus
+
+A hook to track whether the browser window is focused. Useful for pausing/resuming animations, stopping timers, or showing notifications when the user returns.
+
+## Import
+
+```ts
+import { useWindowFocus } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useWindowFocus(): boolean
+```
+
+**Returns**
+
+- Returns `boolean` - `true` if the window is focused, `false` if blurred.
+
+## Example
+
+```tsx
+import { useWindowFocus } from '@intks/ihoku'
+
+const Example = () => {
+  const isFocused = useWindowFocus()
+
+  return (
+    <div>
+      <p>Window is {isFocused ? '🟢 Focused' : '🔴 Blurred'}</p>
+      {!isFocused && <p>Switch back to this tab to continue</p>}
+    </div>
+  )
+}
+```
+

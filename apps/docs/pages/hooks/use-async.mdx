@@ -1,0 +1,62 @@
+# useAsync
+
+A hook to handle asynchronous operations with loading, error, and data states. Automatically manages the async function execution and state updates.
+
+## Import
+
+```ts
+import { useAsync } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useAsync<T, E = Error>(
+  asyncFunction: () => Promise<T>,
+  options?: UseAsyncOptions
+): UseAsyncState<T> & { execute: () => Promise<void>; reset: () => void }
+```
+
+**Parameters**
+
+- **asyncFunction**: `() => Promise<T>` - Required. The async function to execute.
+- **options.immediate**: `boolean` - Optional. Whether to execute immediately on mount (default: `true`).
+
+**Returns**
+
+- Returns an object with:
+  - **data**: `T | null` - The resolved data.
+  - **error**: `Error | null` - The error if the operation failed.
+  - **loading**: `boolean` - Whether the operation is in progress.
+  - **execute**: `() => Promise<void>` - Function to manually trigger the async operation.
+  - **reset**: `() => void` - Function to reset the state.
+
+## Example
+
+```tsx
+import { useAsync } from '@intks/ihoku'
+
+const fetchUser = async () => {
+  const response = await fetch('/api/user')
+  if (!response.ok) throw new Error('Failed to fetch')
+  return response.json()
+}
+
+const Example = () => {
+  const { data, error, loading, execute, reset } = useAsync(fetchUser, {
+    immediate: false,
+  })
+
+  if (loading) return <div>Loading...</div>
+  if (error) return <div>Error: {error.message}</div>
+
+  return (
+    <div>
+      {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
+      <button onClick={execute}>Fetch User</button>
+      <button onClick={reset}>Reset</button>
+    </div>
+  )
+}
+```
+

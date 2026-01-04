@@ -1,0 +1,42 @@
+# useWhyDidYouUpdate
+
+A debugging hook that logs which props changed and their previous/current values. Useful for performance optimization and debugging unnecessary re-renders.
+
+## Import
+
+```ts
+import { useWhyDidYouUpdate } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useWhyDidYouUpdate(name: string, props: Record<string, any>): void
+```
+
+**Parameters**
+
+- **name**: `string` - Required. Component name for logging.
+- **props**: `Record<string, any>` - Required. Props object to track.
+
+**Returns**
+
+- Returns `void`.
+
+## Example
+
+```tsx
+import { useWhyDidYouUpdate } from '@intks/ihoku'
+
+const Example = ({ count, name }: { count: number; name: string }) => {
+  useWhyDidYouUpdate('Example', { count, name })
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <p>Name: {name}</p>
+    </div>
+  )
+}
+```
+

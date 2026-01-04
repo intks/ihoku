@@ -1,0 +1,51 @@
+# useRaf
+
+A hook to run a callback on every frame using `requestAnimationFrame`. Useful for animations, game loops, or any frame-based updates.
+
+## Import
+
+```ts
+import { useRaf } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useRaf(callback: () => void, active?: boolean): void
+```
+
+**Parameters**
+
+- **callback**: `() => void` - Required. Function to call on each frame.
+- **active**: `boolean` - Optional. Whether the animation loop is active (default: `true`).
+
+**Returns**
+
+- Returns `void`.
+
+## Example
+
+```tsx
+import { useState } from 'react'
+import { useRaf } from '@intks/ihoku'
+
+const Example = () => {
+  const [rotation, setRotation] = useState(0)
+
+  useRaf(() => {
+    setRotation((prev) => (prev + 1) % 360)
+  })
+
+  return (
+    <div
+      style={{
+        transform: `rotate(${rotation}deg)`,
+        transition: 'transform 0.1s',
+      }}
+    >
+      Rotating element
+    </div>
+  )
+}
+```
+

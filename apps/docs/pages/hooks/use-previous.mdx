@@ -1,0 +1,44 @@
+# usePrevious
+
+A hook to store and return the previous value of a variable. Useful for comparing current and previous values or implementing undo functionality.
+
+## Import
+
+```ts
+import { usePrevious } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+usePrevious<T>(value: T): T | undefined
+```
+
+**Parameters**
+
+- **value**: `T` - Required. The current value to track.
+
+**Returns**
+
+- Returns `T | undefined` - The previous value, or `undefined` on the first render.
+
+## Example
+
+```tsx
+import { useState } from 'react'
+import { usePrevious } from '@intks/ihoku'
+
+const Example = () => {
+  const [count, setCount] = useState(0)
+  const previousCount = usePrevious(count)
+
+  return (
+    <div>
+      <p>Current: {count}</p>
+      <p>Previous: {previousCount ?? 'N/A'}</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  )
+}
+```
+

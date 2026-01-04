@@ -1,0 +1,64 @@
+# useBreakpoint
+
+A hook to detect the current responsive breakpoint. Uses media queries internally and returns the matching breakpoint name.
+
+## Import
+
+```ts
+import { useBreakpoint } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useBreakpoint(breakpoints?: BreakpointConfig): Breakpoint | null
+```
+
+**Parameters**
+
+- **breakpoints**: `BreakpointConfig` - Optional. Custom breakpoint configuration. Defaults to Tailwind CSS breakpoints:
+  - `xs`: `'(max-width: 639px)'`
+  - `sm`: `'(min-width: 640px) and (max-width: 767px)'`
+  - `md`: `'(min-width: 768px) and (max-width: 1023px)'`
+  - `lg`: `'(min-width: 1024px) and (max-width: 1279px)'`
+  - `xl`: `'(min-width: 1280px) and (max-width: 1535px)'`
+  - `2xl`: `'(min-width: 1536px)'`
+
+**Returns**
+
+- Returns `Breakpoint | null` - The current breakpoint name or `null` if none match.
+
+## Example
+
+```tsx
+import { useBreakpoint } from '@intks/ihoku'
+
+const Example = () => {
+  const breakpoint = useBreakpoint()
+
+  return (
+    <div>
+      <p>Current breakpoint: {breakpoint || 'Unknown'}</p>
+      {breakpoint === 'mobile' && <p>Mobile layout</p>}
+      {breakpoint === 'desktop' && <p>Desktop layout</p>}
+    </div>
+  )
+}
+```
+
+## Example with custom breakpoints
+
+```tsx
+import { useBreakpoint } from '@intks/ihoku'
+
+const Example = () => {
+  const breakpoint = useBreakpoint({
+    mobile: '(max-width: 767px)',
+    tablet: '(min-width: 768px) and (max-width: 1023px)',
+    desktop: '(min-width: 1024px)',
+  })
+
+  return <div>Breakpoint: {breakpoint}</div>
+}
+```
+

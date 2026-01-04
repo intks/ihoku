@@ -1,0 +1,55 @@
+# useDebounce
+
+A hook that returns a debounced version of a callback function. The debounced function will delay its execution until after the specified delay has passed since the last time it was invoked.
+
+## Import
+
+```ts
+import { useDebounce } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useDebounce<T extends unknown[]>(
+  callback: (...args: T) => void,
+  delay: number
+): ((...args: T) => void)
+```
+
+**Parameters**
+
+- **callback**: `(...args: T) => void` - Required. The function to debounce.
+- **delay**: `number` - Required. The debounce delay in milliseconds.
+
+**Returns**
+
+- Returns a debounced version of the callback function.
+
+## Example
+
+```tsx
+import { useState } from 'react'
+import { useDebounce } from '@intks/ihoku'
+
+const Example = () => {
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const debouncedSearch = useDebounce((value: string) => {
+    console.log('Searching for:', value)
+    // Perform search API call
+  }, 500)
+
+  return (
+    <input
+      value={searchTerm}
+      onChange={(e) => {
+        setSearchTerm(e.target.value)
+        debouncedSearch(e.target.value)
+      }}
+      placeholder="Search..."
+    />
+  )
+}
+```
+

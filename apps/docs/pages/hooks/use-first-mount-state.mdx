@@ -1,0 +1,36 @@
+# useFirstMountState
+
+A hook that returns `true` only on the first render, `false` on subsequent renders. Useful for initialization logic that should only run once.
+
+## Import
+
+```ts
+import { useFirstMountState } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useFirstMountState(): boolean
+```
+
+**Returns**
+
+- Returns `boolean` - `true` on first render, `false` otherwise.
+
+## Example
+
+```tsx
+import { useFirstMountState } from '@intks/ihoku'
+
+const Example = () => {
+  const isFirstMount = useFirstMountState()
+
+  if (isFirstMount) {
+    console.log('Component mounted for the first time')
+  }
+
+  return <div>Content</div>
+}
+```
+

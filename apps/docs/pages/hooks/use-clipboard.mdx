@@ -1,0 +1,50 @@
+# useClipboard
+
+A hook to copy text to the clipboard with success/error states and automatic reset. Enhanced version of the basic clipboard hook.
+
+## Import
+
+```ts
+import { useClipboard } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useClipboard(options?: UseClipboardOptions): UseClipboardReturn
+```
+
+**Parameters**
+
+- **options.timeout**: `number` - Optional. Time in milliseconds before resetting the `copied` state (default: `2000`).
+- **options.onSuccess**: `() => void` - Optional. Callback when copy succeeds.
+- **options.onError**: `(error: Error) => void` - Optional. Callback when copy fails.
+
+**Returns**
+
+- Returns a `UseClipboardReturn` object:
+  - **copy**: `(text: string) => Promise<void>` - Function to copy text to clipboard.
+  - **copied**: `boolean` - Whether text was recently copied.
+  - **error**: `Error | null` - Any error that occurred.
+
+## Example
+
+```tsx
+import { useClipboard } from '@intks/ihoku'
+
+const Example = () => {
+  const { copy, copied, error } = useClipboard({
+    onSuccess: () => console.log('Copied!'),
+  })
+
+  return (
+    <div>
+      <button onClick={() => copy('Hello, World!')}>
+        {copied ? 'Copied!' : 'Copy Text'}
+      </button>
+      {error && <p>Error: {error.message}</p>}
+    </div>
+  )
+}
+```
+

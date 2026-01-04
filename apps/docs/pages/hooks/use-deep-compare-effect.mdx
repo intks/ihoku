@@ -1,0 +1,48 @@
+# useDeepCompareEffect
+
+A hook that works like `useEffect`, but uses deep comparison for dependencies instead of shallow comparison. Useful when dependencies are objects or arrays.
+
+## Import
+
+```ts
+import { useDeepCompareEffect } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useDeepCompareEffect(effect: React.EffectCallback, deps: React.DependencyList): void
+```
+
+**Parameters**
+
+- **effect**: `React.EffectCallback` - Required. The effect function to run.
+- **deps**: `React.DependencyList` - Required. Array of dependencies (deeply compared).
+
+**Returns**
+
+- Returns `void`.
+
+## Example
+
+```tsx
+import { useState } from 'react'
+import { useDeepCompareEffect } from '@intks/ihoku'
+
+const Example = () => {
+  const [config, setConfig] = useState({ theme: 'light', lang: 'en' })
+
+  useDeepCompareEffect(() => {
+    console.log('Config changed:', config)
+  }, [config])
+
+  return (
+    <div>
+      <button onClick={() => setConfig({ theme: 'dark', lang: 'en' })}>
+        Change Theme
+      </button>
+    </div>
+  )
+}
+```
+

@@ -1,0 +1,57 @@
+# useLongPress
+
+A hook to detect long press gestures on both mouse and touch devices. Useful for context menus, drag-to-select, or mobile interactions.
+
+## Import
+
+```ts
+import { useLongPress } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useLongPress(
+  onLongPress: () => void,
+  options?: UseLongPressOptions
+): UseLongPressReturn
+```
+
+**Parameters**
+
+- **onLongPress**: `() => void` - Required. Callback function called when long press is detected.
+- **options.threshold**: `number` - Optional. Time in milliseconds before triggering long press (default: `400`).
+- **options.onStart**: `() => void` - Optional. Callback when press starts.
+- **options.onFinish**: `() => void` - Optional. Callback when long press completes.
+- **options.onCancel**: `() => void` - Optional. Callback when press is cancelled.
+
+**Returns**
+
+- Returns a `UseLongPressReturn` object with event handlers:
+  - **onMouseDown**: `(e: React.MouseEvent) => void`
+  - **onMouseUp**: `(e: React.MouseEvent) => void`
+  - **onMouseLeave**: `(e: React.MouseEvent) => void`
+  - **onTouchStart**: `(e: React.TouchEvent) => void`
+  - **onTouchEnd**: `(e: React.TouchEvent) => void`
+
+## Example
+
+```tsx
+import { useLongPress } from '@intks/ihoku'
+
+const Example = () => {
+  const longPress = useLongPress(() => {
+    console.log('Long press detected!')
+  }, {
+    threshold: 500,
+    onStart: () => console.log('Press started'),
+  })
+
+  return (
+    <button {...longPress}>
+      Press and hold me
+    </button>
+  )
+}
+```
+

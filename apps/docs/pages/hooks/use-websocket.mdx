@@ -1,0 +1,62 @@
+# useWebSocket
+
+A hook to manage WebSocket connections with automatic reconnection support. Handles connection states, messages, and errors.
+
+## Import
+
+```ts
+import { useWebSocket } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useWebSocket(url: string | null, options?: UseWebSocketOptions): UseWebSocketReturn
+```
+
+**Parameters**
+
+- **url**: `string | null` - Required. The WebSocket server URL.
+- **options.onOpen**: `(event: Event) => void` - Optional. Callback when connection opens.
+- **options.onClose**: `(event: CloseEvent) => void` - Optional. Callback when connection closes.
+- **options.onMessage**: `(event: MessageEvent) => void` - Optional. Callback when message is received.
+- **options.onError**: `(event: Event) => void` - Optional. Callback when error occurs.
+- **options.reconnect**: `boolean` - Optional. Whether to automatically reconnect (default: `false`).
+- **options.reconnectInterval**: `number` - Optional. Reconnection interval in milliseconds (default: `3000`).
+- **options.reconnectAttempts**: `number` - Optional. Maximum reconnection attempts (default: `5`).
+
+**Returns**
+
+- Returns a `UseWebSocketReturn` object:
+  - **send**: `(data: string | ArrayBuffer | Blob) => void` - Function to send data.
+  - **close**: `() => void` - Function to close the connection.
+  - **reconnect**: `() => void` - Function to manually reconnect.
+  - **status**: `WebSocketStatus` - Connection status: `'connecting'`, `'open'`, `'closing'`, or `'closed'`.
+  - **lastMessage**: `MessageEvent | null` - The last received message.
+  - **error**: `Event | null` - Any error that occurred.
+
+## Example
+
+```tsx
+import { useWebSocket } from '@intks/ihoku'
+
+const Example = () => {
+  const { send, status, lastMessage, error } = useWebSocket('ws://localhost:8080', {
+    onOpen: () => console.log('Connected'),
+    onMessage: (event) => console.log('Message:', event.data),
+    reconnect: true,
+  })
+
+  return (
+    <div>
+      <p>Status: {status}</p>
+      {lastMessage && <p>Last message: {lastMessage.data}</p>}
+      {error && <p>Error occurred</p>}
+      <button onClick={() => send('Hello Server!')} disabled={status !== 'open'}>
+        Send Message
+      </button>
+    </div>
+  )
+}
+```
+

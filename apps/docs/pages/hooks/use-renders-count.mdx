@@ -1,0 +1,40 @@
+# useRendersCount
+
+A hook that returns the number of times the component has rendered. Useful for debugging and performance monitoring.
+
+## Import
+
+```ts
+import { useRendersCount } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useRendersCount(): number
+```
+
+**Returns**
+
+- Returns `number` - The number of renders (starts at 1).
+
+## Example
+
+```tsx
+import { useState } from 'react'
+import { useRendersCount } from '@intks/ihoku'
+
+const Example = () => {
+  const [count, setCount] = useState(0)
+  const renders = useRendersCount()
+
+  return (
+    <div>
+      <p>Renders: {renders}</p>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  )
+}
+```
+

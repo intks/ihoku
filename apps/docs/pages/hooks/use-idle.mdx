@@ -1,0 +1,43 @@
+# useIdle
+
+A hook to detect when the user is idle (no mouse, keyboard, or touch activity). Useful for showing inactivity warnings, auto-logout, or pausing expensive operations.
+
+## Import
+
+```ts
+import { useIdle } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useIdle(options?: UseIdleOptions): boolean
+```
+
+**Parameters**
+
+- **options.timeout**: `number` - Optional. Time in milliseconds before considering the user idle (default: `3000`).
+- **options.events**: `string[]` - Optional. Array of event names to listen to (default: `['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart']`).
+- **options.initialState**: `boolean` - Optional. Initial idle state (default: `false`).
+
+**Returns**
+
+- Returns `boolean` - `true` if the user is idle, `false` otherwise.
+
+## Example
+
+```tsx
+import { useIdle } from '@intks/ihoku'
+
+const Example = () => {
+  const isIdle = useIdle({ timeout: 5000 })
+
+  return (
+    <div>
+      <p>User is {isIdle ? '😴 Idle' : '👆 Active'}</p>
+      {isIdle && <p>You've been idle for 5 seconds</p>}
+    </div>
+  )
+}
+```
+

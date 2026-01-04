@@ -1,0 +1,43 @@
+# useImage
+
+A hook to track the loading state of an image. Useful for showing loading indicators or handling image load errors.
+
+## Import
+
+```ts
+import { useImage } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useImage(url: string | null): UseImageReturn
+```
+
+**Parameters**
+
+- **url**: `string | null` - Required. The image URL to load.
+
+**Returns**
+
+- Returns a `UseImageReturn` object:
+  - **loading**: `boolean` - Whether the image is loading.
+  - **error**: `Error | null` - Any error that occurred.
+  - **src**: `string | null` - The loaded image URL (null if not loaded or error).
+
+## Example
+
+```tsx
+import { useImage } from '@intks/ihoku'
+
+const Example = () => {
+  const { loading, error, src } = useImage('https://example.com/image.jpg')
+
+  if (loading) return <div>Loading image...</div>
+  if (error) return <div>Error: {error.message}</div>
+  if (src) return <img src={src} alt="Loaded" />
+
+  return null
+}
+```
+

@@ -1,0 +1,49 @@
+# useFocus
+
+A hook to manage focus state of an element. Provides methods to programmatically focus/blur and tracks the current focus state.
+
+## Import
+
+```ts
+import { useFocus } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useFocus<T extends HTMLElement = HTMLInputElement>(
+  options?: UseFocusOptions
+): UseFocusReturn<T>
+```
+
+**Parameters**
+
+- **options.autoFocus**: `boolean` - Optional. Whether to automatically focus on mount (default: `false`).
+
+**Returns**
+
+- Returns a `UseFocusReturn<T>` object:
+  - **ref**: `RefObject<T>` - Ref to attach to the element.
+  - **focused**: `boolean` - Whether the element is currently focused.
+  - **setFocus**: `() => void` - Function to focus the element.
+  - **setBlur**: `() => void` - Function to blur the element.
+
+## Example
+
+```tsx
+import { useFocus } from '@intks/ihoku'
+
+const Example = () => {
+  const { ref, focused, setFocus, setBlur } = useFocus()
+
+  return (
+    <div>
+      <input ref={ref} placeholder="Focus me" />
+      <p>Focused: {focused ? 'Yes' : 'No'}</p>
+      <button onClick={setFocus}>Focus Input</button>
+      <button onClick={setBlur}>Blur Input</button>
+    </div>
+  )
+}
+```
+

@@ -1,0 +1,56 @@
+# useSet
+
+A hook to manage a Set data structure with convenient methods. Useful for managing unique collections of values.
+
+## Import
+
+```ts
+import { useSet } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useSet<T>(initialSet?: Set<T>): UseSetReturn<T>
+```
+
+**Parameters**
+
+- **initialSet**: `Set<T>` - Optional. Initial set value (default: `new Set()`).
+
+**Returns**
+
+- Returns a `UseSetReturn<T>` object:
+  - **set**: `Set<T>` - The current set.
+  - **add**: `(item: T) => void` - Add an item to the set.
+  - **remove**: `(item: T) => void` - Remove an item from the set.
+  - **has**: `(item: T) => boolean` - Check if item exists.
+  - **clear**: `() => void` - Clear all items.
+  - **reset**: `() => void` - Reset to initial set.
+  - **size**: `number` - Number of items.
+
+## Example
+
+```tsx
+import { useSet } from '@intks/ihoku'
+
+const Example = () => {
+  const { set, add, remove, has, clear, size } = useSet<string>()
+
+  return (
+    <div>
+      <p>Set size: {size}</p>
+      <button onClick={() => add('item1')}>Add item1</button>
+      <button onClick={() => add('item2')}>Add item2</button>
+      <button onClick={() => remove('item1')}>Remove item1</button>
+      <button onClick={clear}>Clear All</button>
+      <div>
+        {Array.from(set).map((item) => (
+          <div key={item}>{item}</div>
+        ))}
+      </div>
+    </div>
+  )
+}
+```
+

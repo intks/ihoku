@@ -1,0 +1,50 @@
+# useScript
+
+A hook to dynamically load external scripts. Handles loading states, errors, and prevents duplicate script loading.
+
+## Import
+
+```ts
+import { useScript } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useScript(src: string | null, options?: UseScriptOptions): UseScriptReturn
+```
+
+**Parameters**
+
+- **src**: `string | null` - Required. The script source URL.
+- **options.async**: `boolean` - Optional. Whether to load script asynchronously (default: `true`).
+- **options.defer**: `boolean` - Optional. Whether to defer script execution (default: `false`).
+- **options.id**: `string` - Optional. Script element ID.
+- **options.onLoad**: `() => void` - Optional. Callback when script loads successfully.
+- **options.onError**: `(error: Event) => void` - Optional. Callback when script fails to load.
+
+**Returns**
+
+- Returns a `UseScriptReturn` object:
+  - **loading**: `boolean` - Whether the script is loading.
+  - **error**: `Error | null` - Any error that occurred.
+  - **ready**: `boolean` - Whether the script is ready.
+
+## Example
+
+```tsx
+import { useScript } from '@intks/ihoku'
+
+const Example = () => {
+  const { loading, error, ready } = useScript('https://example.com/script.js', {
+    onLoad: () => console.log('Script loaded!'),
+  })
+
+  if (loading) return <div>Loading script...</div>
+  if (error) return <div>Error: {error.message}</div>
+  if (ready) return <div>Script is ready!</div>
+
+  return null
+}
+```
+

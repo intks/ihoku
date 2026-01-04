@@ -1,0 +1,61 @@
+# useIntersectionObserver
+
+A hook that uses the Intersection Observer API to detect when an element enters or leaves the viewport. Perfect for lazy loading images, infinite scrolling, or triggering animations.
+
+## Import
+
+```ts
+import { useIntersectionObserver } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useIntersectionObserver<T extends HTMLElement = HTMLElement>(
+  options?: UseIntersectionObserverOptions
+): [RefObject<T>, IntersectionObserverEntry | null]
+```
+
+**Parameters**
+
+- **options.root**: `Element | null` - Optional. The element that is used as the viewport for checking visibility.
+- **options.rootMargin**: `string` - Optional. Margin around the root (default: `'0px'`).
+- **options.threshold**: `number | number[]` - Optional. Either a single number or an array of numbers which indicate at what percentage of the target's visibility the observer's callback should be executed (default: `0`).
+- **options.enabled**: `boolean` - Optional. Whether the observer is enabled (default: `true`).
+
+**Returns**
+
+- Returns a tuple `[ref, entry]`:
+  - **ref**: `RefObject<T>` - Ref to attach to the element you want to observe.
+  - **entry**: `IntersectionObserverEntry | null` - The intersection observer entry containing information about the element's visibility.
+
+## Example
+
+```tsx
+import { useIntersectionObserver } from '@intks/ihoku'
+
+const Example = () => {
+  const [ref, entry] = useIntersectionObserver({
+    threshold: 0.5,
+  })
+
+  const isVisible = entry?.isIntersecting ?? false
+
+  return (
+    <div>
+      <div style={{ height: '100vh' }}>Scroll down</div>
+      <div
+        ref={ref}
+        style={{
+          padding: 20,
+          background: isVisible ? '#4CAF50' : '#f44336',
+          color: 'white',
+        }}
+      >
+        {isVisible ? 'Visible!' : 'Not visible'}
+      </div>
+    </div>
+  )
+}
+```
+

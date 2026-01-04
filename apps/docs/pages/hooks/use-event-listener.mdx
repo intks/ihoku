@@ -1,0 +1,74 @@
+# useEventListener
+
+A hook to add event listeners to DOM elements, window, or document. Automatically cleans up listeners on unmount.
+
+## Import
+
+```ts
+import { useEventListener } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useEventListener<K extends keyof WindowEventMap>(
+  eventName: K,
+  handler: (event: WindowEventMap[K]) => void,
+  element?: EventTarget,
+  options?: UseEventListenerOptions
+): void
+```
+
+**Parameters**
+
+- **eventName**: `K` - Required. The name of the event to listen to.
+- **handler**: `(event: WindowEventMap[K]) => void` - Required. The event handler function.
+- **element**: `EventTarget` - Optional. The element to attach the listener to (default: `window`).
+- **options.enabled**: `boolean` - Optional. Whether the listener is enabled (default: `true`).
+- **options.capture**: `boolean` - Optional. Use capture phase.
+- **options.once**: `boolean` - Optional. Remove listener after first call.
+- **options.passive**: `boolean` - Optional. Passive listener.
+
+**Returns**
+
+- Returns `void`.
+
+## Example
+
+```tsx
+import { useState } from 'react'
+import { useEventListener } from '@intks/ihoku'
+
+const Example = () => {
+  const [key, setKey] = useState('')
+
+  useEventListener('keydown', (event) => {
+    setKey(event.key)
+  })
+
+  return <div>Last key pressed: {key || 'None'}</div>
+}
+```
+
+## Example with custom element
+
+```tsx
+import { useRef } from 'react'
+import { useEventListener } from '@intks/ihoku'
+
+const Example = () => {
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const [clicked, setClicked] = useState(false)
+
+  useEventListener('click', () => {
+    setClicked(true)
+  }, buttonRef.current)
+
+  return (
+    <button ref={buttonRef}>
+      {clicked ? 'Clicked!' : 'Click me'}
+    </button>
+  )
+}
+```
+

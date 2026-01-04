@@ -1,0 +1,79 @@
+# useFetch
+
+A hook to fetch data from a URL with loading, error, and data states. Includes automatic request cancellation on unmount and manual refetch capability.
+
+## Import
+
+```ts
+import { useFetch } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useFetch<T = any>(
+  url: string | null,
+  options?: UseFetchOptions
+): UseFetchState<T> & { refetch: () => Promise<void>; reset: () => void }
+```
+
+**Parameters**
+
+- **url**: `string | null` - Required. The URL to fetch from.
+- **options.immediate**: `boolean` - Optional. Whether to fetch immediately (default: `true`).
+- **options.onSuccess**: `(data: any) => void` - Optional. Callback when fetch succeeds.
+- **options.onError**: `(error: Error) => void` - Optional. Callback when fetch fails.
+- **options**: `RequestInit` - Optional. Additional fetch options (headers, method, body, etc.).
+
+**Returns**
+
+- Returns an object with:
+  - **data**: `T | null` - The fetched data.
+  - **error**: `Error | null` - The error if the fetch failed.
+  - **loading**: `boolean` - Whether the fetch is in progress.
+  - **refetch**: `() => Promise<void>` - Function to manually refetch the data.
+  - **reset**: `() => void` - Function to reset the state.
+
+## Example
+
+```tsx
+import { useFetch } from '@intks/ihoku'
+
+const Example = () => {
+  const { data, error, loading, refetch } = useFetch('https://api.example.com/data')
+
+  if (loading) return <div>Loading...</div>
+  if (error) return <div>Error: {error.message}</div>
+
+  return (
+    <div>
+      <pre>{JSON.stringify(data, null, 2)}</pre>
+      <button onClick={refetch}>Refetch</button>
+    </div>
+  )
+}
+```
+
+## Example with POST request
+
+```tsx
+import { useFetch } from '@intks/ihoku'
+
+const Example = () => {
+  const { data, loading, refetch } = useFetch('https://api.example.com/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: 'John' }),
+    immediate: false,
+  })
+
+  return (
+    <div>
+      <button onClick={refetch} disabled={loading}>
+        Create User
+      </button>
+      {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
+    </div>
+  )
+}
+```

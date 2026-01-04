@@ -1,0 +1,37 @@
+# useDefault
+
+A hook that returns a default value when the provided value is `null` or `undefined`. Useful for providing fallback values.
+
+## Import
+
+```ts
+import { useDefault } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useDefault<T>(value: T | null | undefined, defaultValue: T): T
+```
+
+**Parameters**
+
+- **value**: `T | null | undefined` - Required. The value to check.
+- **defaultValue**: `T` - Required. The default value to return if value is null/undefined.
+
+**Returns**
+
+- Returns `T` - The value if not null/undefined, otherwise the default value.
+
+## Example
+
+```tsx
+import { useDefault } from '@intks/ihoku'
+
+const Example = ({ name }: { name?: string }) => {
+  const displayName = useDefault(name, 'Guest')
+
+  return <div>Hello, {displayName}!</div>
+}
+```
+

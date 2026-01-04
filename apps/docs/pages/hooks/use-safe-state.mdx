@@ -1,0 +1,45 @@
+# useSafeState
+
+A hook that works like `useState`, but prevents state updates after the component has unmounted. Prevents memory leaks and warnings in React.
+
+## Import
+
+```ts
+import { useSafeState } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useSafeState<T>(initialState: T | (() => T)): [T, (newState: T | ((prev: T) => T)) => void]
+```
+
+**Parameters**
+
+- **initialState**: `T | (() => T)` - Required. Initial state value or function that returns initial state.
+
+**Returns**
+
+- Returns a tuple `[state, setState]` similar to `useState`, but `setState` only updates if component is mounted.
+
+## Example
+
+```tsx
+import { useSafeState } from '@intks/ihoku'
+
+const Example = () => {
+  const [data, setData] = useSafeState<string | null>(null)
+
+  useEffect(() => {
+    fetch('/api/data')
+      .then((res) => res.json())
+      .then((data) => {
+        // Safe to call even if component unmounted
+        setData(data)
+      })
+  }, [])
+
+  return <div>{data}</div>
+}
+```
+

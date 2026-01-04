@@ -1,0 +1,51 @@
+# useClickOutside
+
+A hook to detect clicks outside of a specified element. Useful for closing modals, dropdowns, or popovers when clicking outside of them.
+
+## Import
+
+```ts
+import { useClickOutside } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useClickOutside<T extends HTMLElement = HTMLElement>(
+  options: UseClickOutsideOptions
+): RefObject<T>
+```
+
+**Parameters**
+
+- **options.handler**: `(event: MouseEvent | TouchEvent) => void` - Required. Callback function that is called when a click outside is detected.
+- **options.enabled**: `boolean` - Optional. Whether the hook is enabled (default: `true`).
+
+**Returns**
+
+- Returns a `RefObject<T>` that should be attached to the element you want to detect clicks outside of.
+
+## Example
+
+```tsx
+import { useClickOutside } from '@intks/ihoku'
+
+const Example = () => {
+  const [isOpen, setIsOpen] = useState(false)
+  const ref = useClickOutside({
+    handler: () => setIsOpen(false),
+    enabled: isOpen,
+  })
+
+  return (
+    <div>
+      <button onClick={() => setIsOpen(true)}>Open Menu</button>
+      {isOpen && (
+        <div ref={ref} style={{ border: '1px solid #ccc', padding: 16 }}>
+          <p>Click outside to close</p>
+        </div>
+      )}
+    </div>
+  )
+}
+```

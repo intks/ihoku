@@ -1,0 +1,71 @@
+# useScroll
+
+A hook to track the scroll position of an element or the window. Useful for implementing scroll-based animations, sticky headers, or scroll progress indicators.
+
+## Import
+
+```ts
+import { useScroll } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useScroll(options?: UseScrollOptions): ScrollPosition
+```
+
+**Parameters**
+
+- **options.element**: `HTMLElement | Window | null` - Optional. The element to track scroll position for (default: `window`).
+- **options.enabled**: `boolean` - Optional. Whether the scroll listener is enabled (default: `true`).
+
+**Returns**
+
+- Returns a `ScrollPosition` object:
+  - **x**: `number` - The horizontal scroll position.
+  - **y**: `number` - The vertical scroll position.
+
+## Example
+
+```tsx
+import { useScroll } from '@intks/ihoku'
+
+const Example = () => {
+  const { x, y } = useScroll()
+
+  return (
+    <div>
+      <div style={{ position: 'fixed', top: 0, right: 0, padding: 16, background: '#fff' }}>
+        Scroll Position: ({x}, {y})
+      </div>
+      <div style={{ height: '200vh' }}>
+        <p>Scroll to see the position update</p>
+      </div>
+    </div>
+  )
+}
+```
+
+## Example with custom element
+
+```tsx
+import { useRef } from 'react'
+import { useScroll } from '@intks/ihoku'
+
+const Example = () => {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const { x, y } = useScroll({ element: scrollRef.current })
+
+  return (
+    <div
+      ref={scrollRef}
+      style={{ height: 300, overflow: 'auto', border: '1px solid #ccc' }}
+    >
+      <div style={{ height: 1000, padding: 20 }}>
+        Scroll Position: ({x}, {y})
+      </div>
+    </div>
+  )
+}
+```
+

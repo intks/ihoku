@@ -1,0 +1,68 @@
+# useInterval
+
+A hook to set up an interval that runs a callback function repeatedly. Automatically cleans up on unmount.
+
+## Import
+
+```ts
+import { useInterval } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useInterval(
+  callback: () => void,
+  delay: number | null,
+  options?: UseIntervalOptions
+): void
+```
+
+**Parameters**
+
+- **callback**: `() => void` - Required. The function to call on each interval.
+- **delay**: `number | null` - Required. The interval delay in milliseconds. Set to `null` to disable.
+- **options.immediate**: `boolean` - Optional. Whether to call the callback immediately (default: `false`).
+
+**Returns**
+
+- Returns `void`.
+
+## Example
+
+```tsx
+import { useState } from 'react'
+import { useInterval } from '@intks/ihoku'
+
+const Example = () => {
+  const [count, setCount] = useState(0)
+
+  useInterval(() => {
+    setCount(count + 1)
+  }, 1000)
+
+  return <div>Count: {count}</div>
+}
+```
+
+## Example with immediate option
+
+```tsx
+import { useState } from 'react'
+import { useInterval } from '@intks/ihoku'
+
+const Example = () => {
+  const [count, setCount] = useState(0)
+
+  useInterval(
+    () => {
+      setCount(count + 1)
+    },
+    1000,
+    { immediate: true }
+  )
+
+  return <div>Count: {count}</div>
+}
+```
+

@@ -1,0 +1,49 @@
+# useMemoizedCallback
+
+A hook that returns a memoized callback function that always uses the latest version of the callback. Unlike `useCallback`, this hook doesn't require dependencies and always calls the latest callback.
+
+## Import
+
+```ts
+import { useMemoizedCallback } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useMemoizedCallback<T extends (...args: any[]) => any>(
+  callback: T
+): T
+```
+
+**Parameters**
+
+- **callback**: `T` - Required. The callback function to memoize.
+
+**Returns**
+
+- Returns the memoized callback function with the same signature as the input.
+
+## Example
+
+```tsx
+import { useState } from 'react'
+import { useMemoizedCallback } from '@intks/ihoku'
+
+const Example = () => {
+  const [count, setCount] = useState(0)
+
+  const handleClick = useMemoizedCallback(() => {
+    console.log('Current count:', count)
+    setCount(count + 1)
+  })
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={handleClick}>Increment</button>
+    </div>
+  )
+}
+```
+

@@ -1,0 +1,40 @@
+# useIsomorphicLayoutEffect
+
+A hook that uses `useLayoutEffect` on the client side and `useEffect` on the server side. This prevents hydration mismatches in SSR applications.
+
+## Import
+
+```ts
+import { useIsomorphicLayoutEffect } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useIsomorphicLayoutEffect(effect: React.EffectCallback, deps?: React.DependencyList): void
+```
+
+**Parameters**
+
+- **effect**: `React.EffectCallback` - Required. The effect function to run.
+- **deps**: `React.DependencyList` - Optional. Array of dependencies.
+
+**Returns**
+
+- Returns `void`.
+
+## Example
+
+```tsx
+import { useIsomorphicLayoutEffect } from '@intks/ihoku'
+
+const Example = () => {
+  useIsomorphicLayoutEffect(() => {
+    // This runs synchronously on client, asynchronously on server
+    console.log('Layout effect ran')
+  }, [])
+
+  return <div>Content</div>
+}
+```
+

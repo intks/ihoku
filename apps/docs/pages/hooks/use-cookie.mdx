@@ -1,0 +1,63 @@
+# useCookie
+
+A hook to manage browser cookies. Provides methods to get, set, and remove cookies with full control over cookie options.
+
+## Import
+
+```ts
+import { useCookie } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useCookie(name: string, initialValue?: string): {
+  value: string
+  setCookie: (newValue: string, options?: UseCookieOptions) => void
+  removeCookie: () => void
+}
+```
+
+**Parameters**
+
+- **name**: `string` - Required. The cookie name.
+- **initialValue**: `string` - Optional. Initial value if cookie doesn't exist (default: `''`).
+
+**Returns**
+
+- Returns an object with:
+  - **value**: `string` - Current cookie value.
+  - **setCookie**: `(newValue: string, options?: UseCookieOptions) => void` - Function to set the cookie.
+  - **removeCookie**: `() => void` - Function to remove the cookie.
+
+**Cookie Options**
+
+- **expires**: `Date | number` - Expiration date or days until expiration.
+- **path**: `string` - Cookie path (default: `'/'`).
+- **domain**: `string` - Cookie domain.
+- **secure**: `boolean` - Whether cookie is secure (default: `false`).
+- **sameSite**: `'strict' | 'lax' | 'none'` - SameSite attribute (default: `'lax'`).
+
+## Example
+
+```tsx
+import { useCookie } from '@intks/ihoku'
+
+const Example = () => {
+  const { value, setCookie, removeCookie } = useCookie('theme', 'light')
+
+  return (
+    <div>
+      <p>Theme: {value}</p>
+      <button onClick={() => setCookie('dark', { expires: 7 })}>
+        Set Dark Theme
+      </button>
+      <button onClick={() => setCookie('light', { expires: 7 })}>
+        Set Light Theme
+      </button>
+      <button onClick={removeCookie}>Remove Cookie</button>
+    </div>
+  )
+}
+```
+

@@ -1,0 +1,85 @@
+# useFileReader
+
+A hook to read file contents using the FileReader API. Supports multiple reading methods: text, data URL, array buffer, and binary string.
+
+## Import
+
+```ts
+import { useFileReader } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useFileReader(options?: UseFileReaderOptions): UseFileReaderReturn
+```
+
+**Parameters**
+
+- **options.method**: `FileReaderMethod` - Optional. Reading method: `'readAsText'`, `'readAsDataURL'`, `'readAsArrayBuffer'`, or `'readAsBinaryString'` (default: `'readAsText'`).
+- **options.onLoad**: `(result: string | ArrayBuffer | null) => void` - Optional. Callback when file is loaded.
+- **options.onError**: `(error: ProgressEvent<FileReader>) => void` - Optional. Callback when error occurs.
+
+**Returns**
+
+- Returns a `UseFileReaderReturn` object:
+  - **result**: `string | ArrayBuffer | null` - The file content.
+  - **error**: `ProgressEvent<FileReader> | null` - Any error that occurred.
+  - **loading**: `boolean` - Whether the file is being read.
+  - **read**: `(file: File | Blob) => void` - Function to read a file.
+  - **reset**: `() => void` - Function to reset the state.
+
+## Example
+
+```tsx
+import { useFileReader } from '@intks/ihoku'
+
+const Example = () => {
+  const { result, loading, error, read } = useFileReader({
+    method: 'readAsText',
+    onLoad: (result) => console.log('File loaded:', result),
+  })
+
+  return (
+    <div>
+      <input
+        type="file"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) read(file)
+        }}
+      />
+      {loading && <div>Loading...</div>}
+      {error && <div>Error: {error.type}</div>}
+      {result && <pre>{result as string}</pre>}
+    </div>
+  )
+}
+```
+
+## Example with image preview
+
+```tsx
+import { useFileReader } from '@intks/ihoku'
+
+const Example = () => {
+  const { result, read } = useFileReader({
+    method: 'readAsDataURL',
+  })
+
+  return (
+    <div>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) read(file)
+        }}
+      />
+      {result && <img src={result as string} alt="Preview" />}
+    </div>
+  )
+}
+```
+

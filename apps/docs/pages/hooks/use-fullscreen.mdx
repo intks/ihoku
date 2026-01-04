@@ -1,0 +1,54 @@
+# useFullscreen
+
+A hook to control fullscreen mode of an element or the document. Supports all major browsers with fallbacks.
+
+## Import
+
+```ts
+import { useFullscreen } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useFullscreen(options?: UseFullscreenOptions): UseFullscreenReturn
+```
+
+**Parameters**
+
+- **options.element**: `HTMLElement | null` - Optional. The element to make fullscreen (default: `document.documentElement`).
+- **options.enabled**: `boolean` - Optional. Whether to enter fullscreen on mount (default: `false`).
+- **options.onEnter**: `() => void` - Optional. Callback when entering fullscreen.
+- **options.onExit**: `() => void` - Optional. Callback when exiting fullscreen.
+
+**Returns**
+
+- Returns a `UseFullscreenReturn` object:
+  - **isFullscreen**: `boolean` - Whether currently in fullscreen mode.
+  - **enter**: `() => Promise<void>` - Function to enter fullscreen.
+  - **exit**: `() => Promise<void>` - Function to exit fullscreen.
+  - **toggle**: `() => Promise<void>` - Function to toggle fullscreen.
+
+## Example
+
+```tsx
+import { useRef } from 'react'
+import { useFullscreen } from '@intks/ihoku'
+
+const Example = () => {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const { isFullscreen, enter, exit, toggle } = useFullscreen({
+    element: videoRef.current,
+  })
+
+  return (
+    <div>
+      <video ref={videoRef} src="video.mp4" />
+      <button onClick={toggle}>
+        {isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+      </button>
+    </div>
+  )
+}
+```
+

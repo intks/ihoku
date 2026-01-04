@@ -1,0 +1,39 @@
+# useWindowSize
+
+A hook to track the window size (width and height). Automatically updates when the window is resized.
+
+## Import
+
+```ts
+import { useWindowSize } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useWindowSize(): WindowSize
+```
+
+**Returns**
+
+- Returns a `WindowSize` object:
+  - **width**: `number` - The window width in pixels.
+  - **height**: `number` - The window height in pixels.
+
+## Example
+
+```tsx
+import { useWindowSize } from '@intks/ihoku'
+
+const Example = () => {
+  const { width, height } = useWindowSize()
+
+  return (
+    <div>
+      <p>Window Size: {width} x {height}</p>
+      <p>Screen: {width >= 768 ? 'Desktop' : 'Mobile'}</p>
+    </div>
+  )
+}
+```
+

@@ -1,0 +1,53 @@
+# useSessionStorage
+
+A hook to manage state that persists in sessionStorage. Similar to `useLocalStorage`, but data is cleared when the browser tab is closed.
+
+## Import
+
+```ts
+import { useSessionStorage } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useSessionStorage<T>(key: string, initialValue: T): {
+  value: T
+  setItem: (newValue: T | ((prev: T) => T)) => void
+  removeItem: () => void
+}
+```
+
+**Parameters**
+
+- **key**: `string` - Required. The sessionStorage key.
+- **initialValue**: `T` - Required. The initial value if the key doesn't exist.
+
+**Returns**
+
+- Returns an object with:
+  - **value**: `T` - Current value from sessionStorage.
+  - **setItem**: `(newValue: T | ((prev: T) => T)) => void` - Function to update the value.
+  - **removeItem**: `() => void` - Function to remove the item from sessionStorage.
+
+## Example
+
+```tsx
+import { useSessionStorage } from '@intks/ihoku'
+
+const Example = () => {
+  const { value, setItem, removeItem } = useSessionStorage('tempData', '')
+
+  return (
+    <div>
+      <input
+        value={value}
+        onChange={(e) => setItem(e.target.value)}
+        placeholder="Temporary data"
+      />
+      <button onClick={removeItem}>Clear</button>
+    </div>
+  )
+}
+```
+

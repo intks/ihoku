@@ -1,0 +1,59 @@
+# useGeolocation
+
+A hook to get the user's current geolocation using the Geolocation API. Handles loading states, errors, and provides a method to manually request location.
+
+## Import
+
+```ts
+import { useGeolocation } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useGeolocation(options?: UseGeolocationOptions): UseGeolocationReturn
+```
+
+**Parameters**
+
+- **options.enabled**: `boolean` - Optional. Whether to request location on mount (default: `true`).
+- **options.enableHighAccuracy**: `boolean` - Optional. Request high accuracy (default: `false`).
+- **options.timeout**: `number` - Optional. Timeout in milliseconds (default: `Infinity`).
+- **options.maximumAge**: `number` - Optional. Maximum age of cached position in milliseconds (default: `0`).
+
+**Returns**
+
+- Returns a `UseGeolocationReturn` object:
+  - **position**: `GeolocationPosition | null` - The current position.
+  - **error**: `GeolocationPositionError | null` - Any error that occurred.
+  - **loading**: `boolean` - Whether the location is being fetched.
+  - **getPosition**: `() => void` - Function to manually request location.
+
+## Example
+
+```tsx
+import { useGeolocation } from '@intks/ihoku'
+
+const Example = () => {
+  const { position, error, loading, getPosition } = useGeolocation({
+    enabled: false,
+  })
+
+  if (loading) return <div>Loading location...</div>
+  if (error) return <div>Error: {error.message}</div>
+
+  return (
+    <div>
+      <button onClick={getPosition}>Get Location</button>
+      {position && (
+        <div>
+          <p>Latitude: {position.latitude}</p>
+          <p>Longitude: {position.longitude}</p>
+          <p>Accuracy: {position.accuracy}m</p>
+        </div>
+      )}
+    </div>
+  )
+}
+```
+

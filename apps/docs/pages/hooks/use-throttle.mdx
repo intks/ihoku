@@ -1,0 +1,51 @@
+# useThrottle
+
+A hook that returns a throttled version of a callback function. The throttled function will only be called at most once per specified delay period.
+
+## Import
+
+```ts
+import { useThrottle } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useThrottle<T extends unknown[]>(
+  callback: (...args: T) => void,
+  delay: number
+): ((...args: T) => void)
+```
+
+**Parameters**
+
+- **callback**: `(...args: T) => void` - Required. The function to throttle.
+- **delay**: `number` - Required. The throttle delay in milliseconds.
+
+**Returns**
+
+- Returns a throttled version of the callback function.
+
+## Example
+
+```tsx
+import { useState } from 'react'
+import { useThrottle } from '@intks/ihoku'
+
+const Example = () => {
+  const [count, setCount] = useState(0)
+
+  const handleScroll = useThrottle(() => {
+    setCount((prev) => prev + 1)
+  }, 1000)
+
+  return (
+    <div onScroll={handleScroll} style={{ height: 200, overflow: 'auto' }}>
+      <div style={{ height: 1000 }}>
+        Scroll count (throttled): {count}
+      </div>
+    </div>
+  )
+}
+```
+

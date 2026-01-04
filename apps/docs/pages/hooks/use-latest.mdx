@@ -1,0 +1,45 @@
+# useLatest
+
+A hook that returns a ref object that always holds the latest value. Useful for accessing the latest value in callbacks without causing re-renders.
+
+## Import
+
+```ts
+import { useLatest } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useLatest<T>(value: T): MutableRefObject<T>
+```
+
+**Parameters**
+
+- **value**: `T` - Required. The value to track.
+
+**Returns**
+
+- Returns a `MutableRefObject<T>` that always contains the latest value.
+
+## Example
+
+```tsx
+import { useEffect } from 'react'
+import { useLatest } from '@intks/ihoku'
+
+const Example = ({ count }: { count: number }) => {
+  const latestCount = useLatest(count)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      console.log('Latest count:', latestCount.current)
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
+
+  return <div>Count: {count}</div>
+}
+```
+

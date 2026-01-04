@@ -1,0 +1,51 @@
+# useDoubleClick
+
+A hook to detect double-click events while also handling single-click events. Useful for distinguishing between single and double clicks.
+
+## Import
+
+```ts
+import { useDoubleClick } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useDoubleClick(
+  onDoubleClick: () => void,
+  options?: UseDoubleClickOptions
+): { onClick: () => void }
+```
+
+**Parameters**
+
+- **onDoubleClick**: `() => void` - Required. Callback function called on double click.
+- **options.threshold**: `number` - Optional. Maximum time between clicks in milliseconds (default: `300`).
+- **options.onSingleClick**: `() => void` - Optional. Callback function called on single click.
+
+**Returns**
+
+- Returns an object with:
+  - **onClick**: `() => void` - Event handler to attach to the element.
+
+## Example
+
+```tsx
+import { useDoubleClick } from '@intks/ihoku'
+
+const Example = () => {
+  const { onClick } = useDoubleClick(
+    () => console.log('Double clicked!'),
+    {
+      onSingleClick: () => console.log('Single clicked!'),
+    }
+  )
+
+  return (
+    <button onClick={onClick}>
+      Click or double click me
+    </button>
+  )
+}
+```
+

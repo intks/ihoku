@@ -1,0 +1,48 @@
+# useToggle
+
+A hook to manage a boolean state with toggle, setTrue, and setFalse methods. Provides a convenient API for boolean state management.
+
+## Import
+
+```ts
+import { useToggle } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useToggle(initialValue?: boolean): UseToggleReturn
+```
+
+**Parameters**
+
+- **initialValue**: `boolean` - Optional. Initial value (default: `false`).
+
+**Returns**
+
+- Returns a `UseToggleReturn` object:
+  - **value**: `boolean` - Current boolean value.
+  - **toggle**: `() => void` - Toggle the value.
+  - **setTrue**: `() => void` - Set value to `true`.
+  - **setFalse**: `() => void` - Set value to `false`.
+  - **setValue**: `(value: boolean) => void` - Set value directly.
+
+## Example
+
+```tsx
+import { useToggle } from '@intks/ihoku'
+
+const Example = () => {
+  const { value, toggle, setTrue, setFalse } = useToggle(false)
+
+  return (
+    <div>
+      <p>Value: {value ? 'ON' : 'OFF'}</p>
+      <button onClick={toggle}>Toggle</button>
+      <button onClick={setTrue}>Set True</button>
+      <button onClick={setFalse}>Set False</button>
+    </div>
+  )
+}
+```
+

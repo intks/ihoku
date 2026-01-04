@@ -1,0 +1,39 @@
+# useMergeRefs
+
+A hook to merge multiple refs into a single ref callback. Useful when you need to attach multiple refs to the same element.
+
+## Import
+
+```ts
+import { useMergeRefs } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useMergeRefs<T>(...refs: (React.Ref<T> | undefined)[]): React.RefCallback<T>
+```
+
+**Parameters**
+
+- **refs**: `(React.Ref<T> | undefined)[]` - Required. Array of refs to merge.
+
+**Returns**
+
+- Returns a ref callback that applies all refs to the element.
+
+## Example
+
+```tsx
+import { useRef } from 'react'
+import { useMergeRefs } from '@intks/ihoku'
+
+const Example = () => {
+  const ref1 = useRef<HTMLDivElement>(null)
+  const ref2 = useRef<HTMLDivElement>(null)
+  const mergedRef = useMergeRefs(ref1, ref2)
+
+  return <div ref={mergedRef}>Content</div>
+}
+```
+

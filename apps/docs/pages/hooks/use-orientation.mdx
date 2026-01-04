@@ -1,0 +1,43 @@
+# useOrientation
+
+A hook to track the device screen orientation. Returns the current angle and orientation type.
+
+## Import
+
+```ts
+import { useOrientation } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useOrientation(): OrientationState | null
+```
+
+**Returns**
+
+- Returns an `OrientationState` object or `null` if not supported:
+  - **angle**: `number` - The orientation angle in degrees (0, 90, 180, 270).
+  - **type**: `OrientationType` - The orientation type (`'portrait-primary'`, `'portrait-secondary'`, `'landscape-primary'`, `'landscape-secondary'`).
+
+## Example
+
+```tsx
+import { useOrientation } from '@intks/ihoku'
+
+const Example = () => {
+  const orientation = useOrientation()
+
+  if (!orientation) {
+    return <div>Orientation API not supported</div>
+  }
+
+  return (
+    <div>
+      <p>Angle: {orientation.angle}°</p>
+      <p>Type: {orientation.type}</p>
+    </div>
+  )
+}
+```
+

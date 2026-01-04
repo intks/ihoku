@@ -1,0 +1,55 @@
+# useTimeout
+
+A hook to set a timeout that can be cleared or reset. Useful for delayed actions, debouncing, or showing temporary messages.
+
+## Import
+
+```ts
+import { useTimeout } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useTimeout(callback: () => void, delay: number | null): UseTimeoutReturn
+```
+
+**Parameters**
+
+- **callback**: `() => void` - Required. The function to call after the delay.
+- **delay**: `number | null` - Required. The delay in milliseconds. Set to `null` to disable.
+
+**Returns**
+
+- Returns a `UseTimeoutReturn` object:
+  - **clear**: `() => void` - Clear the timeout.
+  - **reset**: `() => void` - Reset the timeout.
+
+## Example
+
+```tsx
+import { useState } from 'react'
+import { useTimeout } from '@intks/ihoku'
+
+const Example = () => {
+  const [message, setMessage] = useState('')
+
+  const { clear, reset } = useTimeout(() => {
+    setMessage('')
+  }, 3000)
+
+  const showMessage = (text: string) => {
+    setMessage(text)
+    reset()
+  }
+
+  return (
+    <div>
+      <p>{message || 'No message'}</p>
+      <button onClick={() => showMessage('Hello!')}>Show Message</button>
+      <button onClick={clear}>Clear</button>
+    </div>
+  )
+}
+```
+

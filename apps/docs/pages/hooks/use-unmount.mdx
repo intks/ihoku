@@ -1,0 +1,47 @@
+# useUnmount
+
+A hook that runs a callback function when the component unmounts. Useful for cleanup tasks like canceling requests or removing event listeners.
+
+## Import
+
+```ts
+import { useUnmount } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useUnmount(callback: () => void): void
+```
+
+**Parameters**
+
+- **callback**: `() => void` - Required. The function to run on unmount.
+
+**Returns**
+
+- Returns `void`.
+
+## Example
+
+```tsx
+import { useState } from 'react'
+import { useUnmount } from '@intks/ihoku'
+
+const Example = () => {
+  const [mounted, setMounted] = useState(true)
+
+  useUnmount(() => {
+    console.log('Component unmounted')
+    // Perform cleanup tasks
+  })
+
+  return (
+    <div>
+      <button onClick={() => setMounted(false)}>Unmount</button>
+      {mounted && <div>Mounted content</div>}
+    </div>
+  )
+}
+```
+

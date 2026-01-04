@@ -1,0 +1,48 @@
+# useLockBodyScroll
+
+A hook to lock the body scroll when a modal or overlay is open. Automatically restores scroll when unlocked.
+
+## Import
+
+```ts
+import { useLockBodyScroll } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useLockBodyScroll(locked: boolean): void
+```
+
+**Parameters**
+
+- **locked**: `boolean` - Required. Whether to lock the body scroll.
+
+**Returns**
+
+- Returns `void`.
+
+## Example
+
+```tsx
+import { useState } from 'react'
+import { useLockBodyScroll } from '@intks/ihoku'
+
+const Example = () => {
+  const [isOpen, setIsOpen] = useState(false)
+  useLockBodyScroll(isOpen)
+
+  return (
+    <div>
+      <button onClick={() => setIsOpen(true)}>Open Modal</button>
+      {isOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)' }}>
+          <button onClick={() => setIsOpen(false)}>Close</button>
+          <p>Body scroll is locked</p>
+        </div>
+      )}
+    </div>
+  )
+}
+```
+

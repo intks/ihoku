@@ -1,0 +1,45 @@
+# useMediaQuery
+
+A hook to track the state of a CSS media query. Useful for responsive design and conditional rendering based on screen size.
+
+## Import
+
+```ts
+import { useMediaQuery } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useMediaQuery(query: string, defaultValue?: boolean): boolean
+```
+
+**Parameters**
+
+- **query**: `string` - Required. The CSS media query string (e.g., `'(min-width: 768px)'`).
+- **defaultValue**: `boolean` - Optional. Default value to return if `window` is undefined (default: `false`).
+
+**Returns**
+
+- Returns `boolean` - `true` if the media query matches, `false` otherwise.
+
+## Example
+
+```tsx
+import { useMediaQuery } from '@intks/ihoku'
+
+const Example = () => {
+  const isMobile = useMediaQuery('(max-width: 768px)')
+  const isTablet = useMediaQuery('(min-width: 769px) and (max-width: 1024px)')
+  const isDesktop = useMediaQuery('(min-width: 1025px)')
+
+  return (
+    <div>
+      <p>Device: {isMobile ? 'Mobile' : isTablet ? 'Tablet' : 'Desktop'}</p>
+      {isMobile && <p>Mobile content</p>}
+      {isDesktop && <p>Desktop content</p>}
+    </div>
+  )
+}
+```
+

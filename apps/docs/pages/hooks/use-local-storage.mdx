@@ -1,0 +1,51 @@
+# useLocalStorage
+
+A hook to manage state that persists in localStorage. Automatically syncs with localStorage and handles JSON serialization.
+
+## Import
+
+```ts
+import { useLocalStorage } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useLocalStorage<T>(key: string, initialValue: T): {
+  value: T
+  setItem: (newValue: T | ((prev: T) => T)) => void
+}
+```
+
+**Parameters**
+
+- **key**: `string` - Required. The localStorage key.
+- **initialValue**: `T` - Required. The initial value if the key doesn't exist.
+
+**Returns**
+
+- Returns an object with:
+  - **value**: `T` - Current value from localStorage.
+  - **setItem**: `(newValue: T | ((prev: T) => T)) => void` - Function to update the value.
+
+## Example
+
+```tsx
+import { useLocalStorage } from '@intks/ihoku'
+
+const Example = () => {
+  const { value, setItem } = useLocalStorage('username', 'Guest')
+
+  return (
+    <div>
+      <p>Stored username: {value}</p>
+      <input
+        value={value}
+        onChange={(e) => setItem(e.target.value)}
+        placeholder="Enter username"
+      />
+    </div>
+  )
+}
+```
+

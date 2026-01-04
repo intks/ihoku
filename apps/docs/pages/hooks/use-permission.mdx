@@ -1,0 +1,42 @@
+# usePermission
+
+A hook to query the status of a browser permission using the Permissions API. Useful for checking camera, microphone, notifications, and other permissions.
+
+## Import
+
+```ts
+import { usePermission } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+usePermission(permissionName: PermissionName): PermissionState
+```
+
+**Parameters**
+
+- **permissionName**: `PermissionName` - Required. The name of the permission to query. Valid values include: `'camera'`, `'microphone'`, `'notifications'`, `'geolocation'`, `'clipboard-read'`, `'clipboard-write'`, etc.
+
+**Returns**
+
+- Returns `PermissionState` - The permission state: `'granted'`, `'denied'`, `'prompt'`, or `null` if not supported.
+
+## Example
+
+```tsx
+import { usePermission } from '@intks/ihoku'
+
+const Example = () => {
+  const cameraPermission = usePermission('camera')
+  const notificationPermission = usePermission('notifications')
+
+  return (
+    <div>
+      <p>Camera: {cameraPermission ?? 'Not supported'}</p>
+      <p>Notifications: {notificationPermission ?? 'Not supported'}</p>
+    </div>
+  )
+}
+```
+

@@ -1,0 +1,62 @@
+# useArray
+
+A hook to manage an array with convenient methods for common array operations. Provides push, pop, shift, unshift, remove, update, clear, and reset methods.
+
+## Import
+
+```ts
+import { useArray } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useArray<T>(initialArray?: T[]): UseArrayReturn<T>
+```
+
+**Parameters**
+
+- **initialArray**: `T[]` - Optional. Initial array value (default: `[]`).
+
+**Returns**
+
+- Returns a `UseArrayReturn<T>` object:
+  - **array**: `T[]` - Current array.
+  - **setArray**: `(array: T[] | ((prev: T[]) => T[])) => void` - Set array directly.
+  - **push**: `(item: T) => void` - Add item to end.
+  - **pop**: `() => void` - Remove last item.
+  - **shift**: `() => void` - Remove first item.
+  - **unshift**: `(item: T) => void` - Add item to beginning.
+  - **remove**: `(index: number) => void` - Remove item at index.
+  - **removeBy**: `(predicate: (item: T) => boolean) => void` - Remove items matching predicate.
+  - **update**: `(index: number, item: T) => void` - Update item at index.
+  - **clear**: `() => void` - Clear array.
+  - **reset**: `() => void` - Reset to initial array.
+
+## Example
+
+```tsx
+import { useArray } from '@intks/ihoku'
+
+const Example = () => {
+  const { array, push, remove, update, clear, reset } = useArray([1, 2, 3])
+
+  return (
+    <div>
+      <ul>
+        {array.map((item, index) => (
+          <li key={index}>
+            {item}
+            <button onClick={() => remove(index)}>Remove</button>
+            <button onClick={() => update(index, item * 2)}>Double</button>
+          </li>
+        ))}
+      </ul>
+      <button onClick={() => push(array.length + 1)}>Add Item</button>
+      <button onClick={clear}>Clear</button>
+      <button onClick={reset}>Reset</button>
+    </div>
+  )
+}
+```
+

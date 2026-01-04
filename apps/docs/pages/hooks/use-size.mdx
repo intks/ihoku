@@ -1,0 +1,50 @@
+# useSize
+
+A hook to track the size of an element using ResizeObserver. Automatically updates when the element is resized.
+
+## Import
+
+```ts
+import { useSize } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useSize<T extends HTMLElement = HTMLElement>(ref: RefObject<T>): Size
+```
+
+**Parameters**
+
+- **ref**: `RefObject<T>` - Required. A ref to the element to observe.
+
+**Returns**
+
+- Returns a `Size` object:
+  - **width**: `number` - The element width in pixels.
+  - **height**: `number` - The element height in pixels.
+
+## Example
+
+```tsx
+import { useRef } from 'react'
+import { useSize } from '@intks/ihoku'
+
+const Example = () => {
+  const ref = useRef<HTMLDivElement>(null)
+  const { width, height } = useSize(ref)
+
+  return (
+    <div>
+      <div
+        ref={ref}
+        style={{ border: '1px solid #ccc', padding: 20, resize: 'both', overflow: 'auto' }}
+      >
+        <p>Resize me!</p>
+        <p>Size: {width} x {height}</p>
+      </div>
+    </div>
+  )
+}
+```
+

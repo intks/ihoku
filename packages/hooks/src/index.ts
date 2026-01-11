@@ -50,7 +50,7 @@ export { default as useIsomorphicLayoutEffect } from './use-isomorphic-layout-ef
 export { default as useDeepCompareEffect } from './use-deep-compare-effect'
 export { default as useWhyDidYouUpdate } from './use-why-did-you-update'
 export { default as useCounter, type UseCounterOptions, type UseCounterReturn } from './use-counter'
-export { default as useArray, type UseArrayReturn } from './use-array'
+
 
 // Storage hooks
 export { default as useSessionStorage } from './use-session-storage'

@@ -49,8 +49,6 @@ export default {
   'use-breakpoint': 'useBreakpoint',
   'use-long-press': 'useLongPress',
   'use-double-click': 'useDoubleClick',
-  'use-map': 'useMap',
-  'use-set': 'useSet',
   'use-queue': 'useQueue',
   'use-script': 'useScript',
   'use-image': 'useImage',

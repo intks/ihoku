@@ -66,8 +66,6 @@ export { default as useLongPress, type UseLongPressOptions, type UseLongPressRet
 export { default as useDoubleClick, type UseDoubleClickOptions } from './use-double-click'
 
 // Data structure hooks
-export { default as useMap, type UseMapReturn } from './use-map'
-export { default as useSet, type UseSetReturn } from './use-set'
 export { default as useQueue, type UseQueueReturn } from './use-queue'
 
 // Resource hooks

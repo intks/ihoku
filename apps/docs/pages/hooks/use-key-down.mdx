@@ -1,0 +1,72 @@
+# useKeyDown
+
+A hook that listens for keyboard events on a specified target element. It supports key combinations, modifiers (ctrl, shift, alt, meta), and provides flexible key filtering options.
+
+## Import
+
+```ts
+import { useKeyDown } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useKeyDown(
+  keyFilter: KeyType | KeyType[] | ((event: KeyboardEvent) => boolean),
+  eventHandler: (event: KeyboardEvent, key: KeyType) => void,
+  options?: UseKeyDownOptions
+): void
+```
+
+**Parameters**
+
+- **keyFilter**: `KeyType | KeyType[] | ((event: KeyboardEvent) => boolean)` - Required. The key or key combination to listen for. Can be a string (e.g., 'a', 'enter', 'ctrl.s'), number (keyCode), array of keys, or a predicate function.
+- **eventHandler**: `(event: KeyboardEvent, key: KeyType) => void` - Required. The callback function to execute when the key is pressed.
+- **options**: `UseKeyDownOptions` - Optional. Configuration options.
+
+**Options**
+
+- **events**: `KeyEvent[]` - Array of event types to listen for. Defaults to `['keydown']`.
+- **target**: `HTMLElement | Document | Window | (() => HTMLElement | Document | Window) | null` - The target element to attach the event listener to. Defaults to `window`.
+- **exactMatch**: `boolean` - If `true`, only triggers when the exact key combination matches. Defaults to `false`.
+- **useCapture**: `boolean` - Whether to use capture phase. Defaults to `false`.
+
+## Key Format
+
+Keys can be specified in several formats:
+
+- **Single key**: `'a'`, `'enter'`, `'esc'`, `'space'`
+- **Modifier combinations**: `'ctrl.s'`, `'shift.enter'`, `'meta.k'`
+- **Key codes**: `13` (Enter), `27` (Escape)
+- **Arrays**: `['a', 'b', 'c']` - triggers on any of these keys
+- **Functions**: `(event) => event.key === 'Enter'` - custom predicate
+
+## Example
+
+```tsx
+import { useKeyDown } from '@intks/ihoku'
+
+const Example = () => {
+  useKeyDown('enter', (event) => {
+    console.log('Enter key pressed')
+  })
+
+  useKeyDown('ctrl.s', (event) => {
+    event.preventDefault()
+    console.log('Save shortcut pressed')
+  })
+
+  useKeyDown(['escape', 'esc'], (event) => {
+    console.log('Escape key pressed')
+  })
+
+  useKeyDown(
+    (event) => event.key === 'Enter' && event.shiftKey,
+    (event) => {
+      console.log('Shift+Enter pressed')
+    }
+  )
+
+  return <div>Press keys to see console logs</div>
+}
+```

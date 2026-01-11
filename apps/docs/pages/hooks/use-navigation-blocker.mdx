@@ -1,0 +1,76 @@
+# useNavigationBlocker
+
+A hook that blocks navigation when there are unsaved changes. It prevents the user from leaving the page (via browser navigation or beforeunload event) when `shouldBlockRoute` is `true`.
+
+## Import
+
+```ts
+import { useNavigationBlocker } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useNavigationBlocker(props: UseNavigationBlockerProps): void
+```
+
+**Parameters**
+
+- **props**: `UseNavigationBlockerProps` - Required. Configuration object.
+
+**Props**
+
+- **shouldBlockRoute**: `boolean` - Required. Whether to block navigation.
+- **onLeave**: `() => void` - Optional. Callback function called when navigation is allowed to proceed.
+- **options**: `Options` - Optional. Customization options for the blocker.
+
+**Options**
+
+- **title**: `string` - Optional. Title for the confirmation dialog.
+- **description**: `string` - Optional. Description for the confirmation dialog.
+- **submitText**: `string` - Optional. Text for the submit/confirm button.
+- **cancelText**: `string` - Optional. Text for the cancel button.
+
+## Note
+
+This hook currently implements `beforeunload` blocking. For React Router navigation blocking, you'll need to integrate with `useBlocker` from `react-router-dom` (see the hook's source code for commented implementation).
+
+## Example
+
+```tsx
+import { useState } from 'react'
+import { useNavigationBlocker } from '@intks/ihoku'
+
+const Example = () => {
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [formData, setFormData] = useState('')
+
+  useNavigationBlocker({
+    shouldBlockRoute: hasUnsavedChanges,
+    onLeave: () => {
+      console.log('Navigation allowed')
+      setHasUnsavedChanges(false)
+    },
+    options: {
+      title: 'Unsaved Changes',
+      description: 'You have unsaved changes. Are you sure you want to leave?',
+      submitText: 'Leave',
+      cancelText: 'Stay',
+    },
+  })
+
+  return (
+    <div>
+      <input
+        value={formData}
+        onChange={(e) => {
+          setFormData(e.target.value)
+          setHasUnsavedChanges(true)
+        }}
+        placeholder="Type something..."
+      />
+      <p>Has unsaved changes: {String(hasUnsavedChanges)}</p>
+    </div>
+  )
+}
+```

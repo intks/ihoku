@@ -1,6 +1,5 @@
 import { alpha, styled } from '@mui/material/styles';
 
-import { theme } from '../../styles';
 
 export type Placement =
   | 'top-left'
@@ -27,9 +26,7 @@ export const StyledArrow = styled('span', {
 
   const POSITION = -(SIZE / 2);
 
-  const { palette, breakpoints } = theme();
-
-  const borderStyle = `solid 1px ${alpha(palette.grey[500], 0.12)}`;
+  const borderStyle = `solid 1px ${alpha('#999', 0.12)}`;
 
   const topStyle = {
     borderRadius: '0 0 3px 0',
@@ -58,14 +55,14 @@ export const StyledArrow = styled('span', {
 
   return {
     display: 'none',
-    [breakpoints.up('sm')]: {
+    [`@media (min-width: 640px)`]: {
       width: SIZE,
       height: SIZE,
       content: "''",
       display: 'block',
       position: 'absolute',
       transform: 'rotate(-135deg)',
-      background: palette.background.paper,
+      background: 'background.paper',
     },
     // Top
     ...(placement === 'top-left' && { ...topStyle, left: 20 }),

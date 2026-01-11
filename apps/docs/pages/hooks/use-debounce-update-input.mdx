@@ -1,0 +1,55 @@
+# useDebounceUpdateInput
+
+A hook that manages input value with debounced updates. It provides both the immediate input value and a debounced version that updates after a specified delay, making it perfect for search inputs or form fields that need to trigger API calls.
+
+## Import
+
+```ts
+import { useDebounceUpdateInput } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useDebounceUpdateInput(delay?: number): {
+  inputValue: string
+  debouncedValue: string
+  handleChangeInputValue: (value: string) => void
+}
+```
+
+**Parameters**
+
+- **delay**: `number` - Optional. The debounce delay in milliseconds. Defaults to `500`.
+
+**Returns**
+
+- **inputValue**: `string` - The current input value (updates immediately)
+- **debouncedValue**: `string` - The debounced input value (updates after delay)
+- **handleChangeInputValue**: `(value: string) => void` - Function to update the input value
+
+## Example
+
+```tsx
+import { useDebounceUpdateInput } from '@intks/ihoku'
+
+const Example = () => {
+  const { inputValue, debouncedValue, handleChangeInputValue } = useDebounceUpdateInput(500)
+
+  // Use debouncedValue for API calls
+  useEffect(() => {
+    if (debouncedValue) {
+      console.log('Searching for:', debouncedValue)
+      // Perform search API call
+    }
+  }, [debouncedValue])
+
+  return (
+    <div>
+      <input value={inputValue} onChange={(e) => handleChangeInputValue(e.target.value)} placeholder='Search...' />
+      <p>Current: {inputValue}</p>
+      <p>Debounced: {debouncedValue}</p>
+    </div>
+  )
+}
+```

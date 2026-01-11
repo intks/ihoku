@@ -37,6 +37,10 @@ export default {
   'use-memoized-callback': 'useMemoizedCallback',
   'use-isomorphic-layout-effect': 'useIsomorphicLayoutEffect',
   'use-debounce': 'useDebounce',
+  'use-debounce-update-input': 'useDebounceUpdateInput',
+  'use-key-down': 'useKeyDown',
+  'use-navigation-blocker': 'useNavigationBlocker',
+  'use-shift-keydown': 'useShiftKeydown',
   'use-local-storage': 'useLocalStorage',
   'use-session-storage': 'useSessionStorage',
   'use-cookie': 'useCookie',
@@ -48,21 +52,15 @@ export default {
   'use-map': 'useMap',
   'use-set': 'useSet',
   'use-queue': 'useQueue',
-  // Resource hooks
   'use-script': 'useScript',
   'use-image': 'useImage',
-  // Performance hooks
   'use-latest': 'useLatest',
   'use-safe-state': 'useSafeState',
   'use-merge-refs': 'useMergeRefs',
   'use-raf': 'useRaf',
-  // Device hooks
   'use-orientation': 'useOrientation',
-  // File hooks
   'use-file-reader': 'useFileReader',
-  // Network hooks
   'use-websocket': 'useWebSocket',
-  // Utility hooks
   'use-first-mount-state': 'useFirstMountState',
   'use-renders-count': 'useRendersCount',
   'use-default': 'useDefault',

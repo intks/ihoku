@@ -1,0 +1,54 @@
+# useShiftKeydown
+
+A specialized hook that listens for Shift key combinations. It's a convenience wrapper around `useKeyDown` that automatically handles Shift key combinations with exact matching enabled by default.
+
+## Import
+
+```ts
+import { useShiftKeydown } from '@intks/ihoku'
+```
+
+## API
+
+```ts
+useShiftKeydown(
+  key: KeyType | null,
+  eventHandler: (event: KeyboardEvent, key: KeyType) => void,
+  options?: UseShiftKeydownOptions
+): void
+```
+
+**Parameters**
+
+- **key**: `KeyType | null` - Required. The key to combine with Shift. If `null`, listens for Shift key alone.
+- **eventHandler**: `(event: KeyboardEvent, key: KeyType) => void` - Required. The callback function to execute when the key combination is pressed.
+- **options**: `UseShiftKeydownOptions` - Optional. Configuration options (extends `UseKeyDownOptions` except `exactMatch`).
+
+**Options**
+
+- **exactMatch**: `boolean` - Whether to require exact match. Defaults to `true`.
+- **events**: `KeyEvent[]` - Array of event types to listen for.
+- **target**: `HTMLElement | Document | Window | (() => HTMLElement | Document | Window) | null` - The target element.
+- **useCapture**: `boolean` - Whether to use capture phase.
+
+## Example
+
+```tsx
+import { useShiftKeydown } from '@intks/ihoku'
+
+const Example = () => {
+  useShiftKeydown('enter', (event) => {
+    console.log('Shift+Enter pressed')
+  })
+
+  useShiftKeydown('a', (event) => {
+    console.log('Shift+A pressed')
+  })
+
+  useShiftKeydown(null, (event) => {
+    console.log('Shift key pressed alone')
+  })
+
+  return <div>Press Shift+Enter or Shift+A to see console logs</div>
+}
+```

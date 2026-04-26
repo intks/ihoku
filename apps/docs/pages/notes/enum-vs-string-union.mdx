@@ -1,0 +1,174 @@
+# TypeScript：Enum、const enum、Union Type 該怎麼選？
+
+三種寫法都是在告訴 TypeScript「這個值只能是固定幾種選項之一」，但在**編譯結果、效能、維護性**上各有取捨。這篇筆記整理選擇的判斷邏輯，以及原文較少提到的 `const enum` 細節。
+
+---
+
+## 快速比較
+
+|                      | `enum`          | `const enum`        | Union Type |
+| -------------------- | --------------- | ------------------- | ---------- |
+| 編譯後產物           | JS 物件（IIFE） | inline 常值，無物件 | 無，純型別 |
+| Bundle 體積          | 較大            | 小（接近 union）    | 最小       |
+| 可遍歷成員           | ✅              | ❌                  | ❌         |
+| Reverse mapping      | ✅（數字 enum） | ❌                  | ❌         |
+| 接 API 字串          | 需手動轉換      | 需手動轉換          | ✅ 直接用  |
+| isolatedModules 相容 | ✅              | ⚠️ 需額外設定       | ✅         |
+
+---
+
+## 各自的特性
+
+### `enum`：有實體的常數集合
+
+```ts
+export enum Status {
+  Successful = 'successful',
+  Failed = 'failed',
+  Skipped = 'skipped',
+}
+```
+
+編譯後會產生一個 JS 物件：
+
+```js
+var Status
+;(function (Status) {
+  Status['Successful'] = 'successful'
+  Status['Failed'] = 'failed'
+  Status['Skipped'] = 'skipped'
+})(Status || (Status = {}))
+```
+
+**適合的情境：**
+
+- 需要遍歷所有成員（`Object.values(Status)`）
+- 數字 enum 需要反向對應（數值 → 名稱）
+- 改值只想動一個地方，全域生效
+
+---
+
+### `const enum`：語意保留，編譯後消失
+
+```ts
+const enum Direction {
+  Up = 'UP',
+  Down = 'DOWN',
+}
+
+// 使用處
+move(Direction.Up)
+```
+
+編譯後，呼叫處直接被展開成常值：
+
+```js
+move('UP') // Direction.Up 被 inline，物件不存在
+```
+
+**優點：** 保留 `enum` 的語意與可讀性，同時不增加 bundle 體積。  
+**限制：** 無法在執行時取得物件、遍歷成員；在 `isolatedModules: true`（Vite、esbuild）或 Babel 轉譯的專案中**需要額外設定，否則會出錯**。
+
+---
+
+### Union Type：純型別，零編譯成本
+
+```ts
+export type Status = 'successful' | 'failed' | 'skipped'
+```
+
+編譯後完全消失，不產生任何 JS。直接對應 API 回傳的字串，不需要額外轉換。
+
+**適合的情境：**
+
+- 接 API / JSON 的字串或數字欄位
+- 對 bundle 體積敏感的前端專案
+- 想讓寫法貼近原生 JavaScript
+
+**常見搭配**：如果需要「命名常數」的可讀性，可以搭配 `as const` 物件：
+
+```ts
+export const STATUS = {
+  Successful: 'successful',
+  Failed: 'failed',
+  Skipped: 'skipped',
+} as const
+
+export type Status = (typeof STATUS)[keyof typeof STATUS]
+// 等同於 'successful' | 'failed' | 'skipped'
+```
+
+這樣同時有「物件可取用」的方便性，又保持 bundle 精簡。
+
+---
+
+## 數字場景：`enum` 更有優勢
+
+處理 HTTP status code 這類數字常數時，enum 的語意優勢很明顯：
+
+```ts
+// ✅ 可讀性好，可反向對應
+enum StatusCode {
+  OK = 200,
+  BadRequest = 400,
+  NotFound = 404,
+}
+
+// ❌ 一串數字，語意薄弱
+type StatusCode = 200 | 400 | 404
+```
+
+---
+
+## 選擇建議
+
+**用 `enum` 或 `const enum` 的時機：**
+
+- 一組彼此相關的語意常數（HTTP 狀態碼、錯誤代碼、方向、星期）
+- 需要遍歷成員或反向對應 → 選普通 `enum`
+- 只需要語意可讀性、不需要物件 → 選 `const enum`（確認 toolchain 支援）
+
+**用 Union Type 的時機：**
+
+- 直接對應 API / JSON 的字串欄位
+- 前端專案在意 bundle 體積
+- 需要精簡、貼近原生 JS 的寫法
+
+**實務上最常見的組合：**
+
+```
+數字常數（錯誤碼、狀態碼）→ enum
+API 字串欄位、UI 狀態    → union type 或 as const 物件
+```
+
+---
+
+## 天氣 App 的實際範例
+
+```ts
+// 星期：語意清楚、穩定 → const enum
+const enum DayOfWeek {
+  Monday = 'Monday',
+  Tuesday = 'Tuesday',
+  Wednesday = 'Wednesday',
+  // ...
+}
+
+// 天氣狀況：直接對應 API 回傳字串 → union type
+type WeatherCondition = 'sunny' | 'rainy' | 'cloudy' | 'snowy'
+
+// API response 直接就能用，不需要轉換
+const condition: WeatherCondition = apiResponse.weather // ✅
+```
+
+---
+
+## 結論
+
+> 沒有一種寫法絕對最好，關鍵是**清楚了解各自的編譯行為**，然後根據使用情境做選擇。
+
+- **想要遍歷、反向對應** → `enum`
+- **要語意但不要物件開銷，且確認 toolchain 支援** → `const enum`
+- **接 API、在意體積、寫法簡單** → `union type`
+
+同一個專案可以混用，但建議在 coding convention 中明訂使用原則，降低團隊的決策成本。

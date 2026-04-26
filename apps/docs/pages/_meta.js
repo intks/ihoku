@@ -1,6 +1,7 @@
 export default {
   index: 'Overview',
   'getting-started': 'Getting Started',
-  hooks: 'Hooks'
+  hooks: 'Hooks',
+  notes: 'Notes'
 }
 

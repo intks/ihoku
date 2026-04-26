@@ -1,0 +1,767 @@
+# 現代 React App 設計思維：Feature、Component、Function 的拆分哲學
+
+> 這份文件整理了現代 React 應用在設計 feature、component、function 時常見的思考框架與實務原則。目標不是給出一套死板的規則，而是建立一套**可以自問自答的判斷直覺**。
+
+---
+
+## 目錄
+
+1. [從「為什麼拆」開始思考](#1-從為什麼拆開始思考)
+2. [Component 拆分的思考維度](#2-component-拆分的思考維度)
+3. [Feature 的邊界怎麼劃？](#3-feature-的邊界怎麼劃)
+4. [Custom Hook 的拆分時機與設計原則](#4-custom-hook-的拆分時機與設計原則)
+5. [Utility Function 的設計](#5-utility-function-的設計)
+6. [State 的歸屬與管理策略](#6-state-的歸屬與管理策略)
+7. [API 層的設計](#7-api-層的設計)
+8. [常見的設計壞味道](#8-常見的設計壞味道)
+9. [決策速查表](#9-決策速查表)
+
+---
+
+## 1. 從「為什麼拆」開始思考
+
+拆分不是目的，**可維護性與可理解性才是**。在動手拆之前，先問三個問題：
+
+| 問題                                 | 說明                                         |
+| ------------------------------------ | -------------------------------------------- |
+| **這個東西會不會被複用？**           | 如果只在一個地方用，過早抽象反而增加認知負擔 |
+| **這個東西的變化頻率跟周圍一樣嗎？** | 如果某個部分常常獨立變動，就應該隔離它       |
+| **這個東西的責任是什麼？**           | 一個單元只做一件事，邊界才清楚               |
+
+### 過早抽象的代價
+
+```tsx
+// ❌ 為了「以後可能複用」而提前抽象，結果 props 越來越多
+<UniversalButton
+  variant="primary"
+  size="md"
+  icon={<PlusIcon />}
+  iconPosition="left"
+  loading={isLoading}
+  disabled={isDisabled}
+  fullWidth={false}
+  onClick={handleClick}
+  label="新增項目"
+/>
+
+// ✅ 先寫具體的，等真正複用的需求出現再抽象
+<button
+  className="btn-primary"
+  onClick={handleAddItem}
+  disabled={isLoading}
+>
+  <PlusIcon /> 新增項目
+</button>
+```
+
+---
+
+## 2. Component 拆分的思考維度
+
+### 2.1 單一職責原則（Single Responsibility）
+
+一個 component 只應該有「一個改變它的理由」。當你描述一個 component 需要用到「而且」（and），這通常是拆分訊號。
+
+```
+ProductCard → 顯示產品資訊 ✅
+ProductCard → 顯示產品資訊「而且」處理加入購物車邏輯「而且」追蹤點擊事件 ❌
+```
+
+### 2.2 三種拆分維度
+
+#### 維度一：UI 結構拆分（Layout Decomposition）
+
+依照視覺結構把大 component 切成小塊，讓每塊對應畫面上的一個獨立區域。
+
+```tsx
+// Before
+function ProductPage() {
+  return (
+    <div>
+      {/* 200 行 header JSX */}
+      {/* 150 行 gallery JSX */}
+      {/* 300 行 detail JSX */}
+      {/* 100 行 review JSX */}
+    </div>
+  )
+}
+
+// After
+function ProductPage() {
+  return (
+    <div>
+      <ProductHeader product={product} />
+      <ProductGallery images={product.images} />
+      <ProductDetail product={product} />
+      <ProductReviews productId={product.id} />
+    </div>
+  )
+}
+```
+
+#### 維度二：邏輯與 UI 分離（Container / Presentational）
+
+把「知道怎麼取資料、管理狀態」的邏輯層，和「知道怎麼呈現畫面」的 UI 層分開。在 hooks 時代，這個模式演化為 **Custom Hook + Pure Component**。
+
+```tsx
+// ✅ 邏輯在 hook 裡
+function useUserProfile(userId: string) {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['user', userId],
+    queryFn: () => fetchUser(userId),
+  })
+
+  const handleUpdateAvatar = useCallback(
+    async (file: File) => {
+      // ... 上傳邏輯
+    },
+    [userId],
+  )
+
+  return { user: data, isLoading, error, handleUpdateAvatar }
+}
+
+// ✅ UI component 只管畫面，props 接什麼就顯示什麼
+function UserProfileView({ user, isLoading, onUpdateAvatar }: UserProfileViewProps) {
+  if (isLoading) return <Skeleton />
+  return (
+    <div>
+      <Avatar src={user.avatar} onUpdate={onUpdateAvatar} />
+      <h1>{user.name}</h1>
+    </div>
+  )
+}
+
+// ✅ 組合點：在 page 或 feature 入口處連接
+function UserProfilePage({ userId }: { userId: string }) {
+  const { user, isLoading, handleUpdateAvatar } = useUserProfile(userId)
+  return <UserProfileView user={user} isLoading={isLoading} onUpdateAvatar={handleUpdateAvatar} />
+}
+```
+
+#### 維度三：變化頻率拆分（Rate of Change）
+
+把「幾乎不會改動」的部分和「經常改動」的部分隔離，減少不相關的重新渲染與修改風險。
+
+```tsx
+// ❌ 靜態 header 和動態 badge 在同一個 component
+// 只要 notificationCount 改變，整個 NavBar 就重新渲染
+function NavBar({ notificationCount }: { notificationCount: number }) {
+  return (
+    <nav>
+      <Logo /> {/* 永遠不變 */}
+      <NavLinks /> {/* 幾乎不變 */}
+      <Badge count={notificationCount} /> {/* 頻繁變動 */}
+    </nav>
+  )
+}
+
+// ✅ 把高頻變動的部分隔離
+function NavBar() {
+  return (
+    <nav>
+      <Logo />
+      <NavLinks />
+      <NotificationBadge /> {/* 自己訂閱自己需要的狀態 */}
+    </nav>
+  )
+}
+
+function NotificationBadge() {
+  const count = useNotificationCount() // 只有這個 component 重新渲染
+  return <Badge count={count} />
+}
+```
+
+### 2.3 Component 的黃金大小
+
+沒有絕對的行數標準，但可以參考這些信號：
+
+| 信號                                  | 建議動作                 |
+| ------------------------------------- | ------------------------ |
+| JSX 超過 100 行                       | 考慮拆分子 component     |
+| 超過 3 個以上的 `useState`            | 考慮移到 custom hook     |
+| Props 超過 5～6 個                    | 考慮拆分或重新思考資料流 |
+| 難以用一句話描述這個 component 做什麼 | 必然需要重構             |
+
+### 2.4 組合優於繼承：Composition Pattern
+
+React 最強大的設計模式之一。透過 `children` 或 slot props，讓 component 更有彈性而不需要暴露過多 props。
+
+```tsx
+// ❌ Props drilling hell
+<Modal
+  title="確認刪除"
+  body="此操作無法復原"
+  footer={<Button onClick={onConfirm}>確認</Button>}
+  hasCloseButton
+  onClose={onClose}
+/>
+
+// ✅ Composition：使用者決定怎麼組合
+<Modal onClose={onClose}>
+  <Modal.Header>確認刪除</Modal.Header>
+  <Modal.Body>此操作無法復原</Modal.Body>
+  <Modal.Footer>
+    <Button variant="danger" onClick={onConfirm}>確認</Button>
+    <Button variant="ghost" onClick={onClose}>取消</Button>
+  </Modal.Footer>
+</Modal>
+```
+
+**Compound Component 實作示例：**
+
+```tsx
+const ModalContext = createContext<ModalContextValue | null>(null)
+
+function Modal({ children, onClose }: ModalProps) {
+  return (
+    <ModalContext.Provider value={{ onClose }}>
+      <div className='modal-overlay' onClick={onClose}>
+        <div className='modal-content' onClick={(e) => e.stopPropagation()}>
+          {children}
+        </div>
+      </div>
+    </ModalContext.Provider>
+  )
+}
+
+Modal.Header = function ModalHeader({ children }: { children: ReactNode }) {
+  const { onClose } = useModalContext()
+  return (
+    <div className='modal-header'>
+      <h2>{children}</h2>
+      <button onClick={onClose}>✕</button>
+    </div>
+  )
+}
+
+Modal.Body = function ModalBody({ children }: { children: ReactNode }) {
+  return <div className='modal-body'>{children}</div>
+}
+
+Modal.Footer = function ModalFooter({ children }: { children: ReactNode }) {
+  return <div className='modal-footer'>{children}</div>
+}
+```
+
+---
+
+## 3. Feature 的邊界怎麼劃？
+
+### 3.1 什麼是 Feature？
+
+Feature 是**一個使用者可以完成的完整任務或工作流程**，對應的是業務能力，而不是技術分類。
+
+| 錯誤的分類方式（技術導向）      | 正確的分類方式（業務導向）             |
+| ------------------------------- | -------------------------------------- |
+| `components/` `hooks/` `utils/` | `auth/` `checkout/` `product-catalog/` |
+| 所有 modal 放在一起             | modal 跟著使用它的 feature             |
+| 所有 API call 放在一起          | API call 跟著使用它的 feature          |
+
+### 3.2 Feature 資料夾的解剖
+
+一個 feature 資料夾的典型結構：
+
+```
+features/
+└── checkout/
+    ├── index.ts              # 公開 API（只 export 外部需要的東西）
+    ├── CheckoutPage.tsx      # Feature 入口 component
+    ├── components/           # 這個 feature 專屬的子 component
+    │   ├── CartSummary.tsx
+    │   ├── PaymentForm.tsx
+    │   └── OrderConfirmation.tsx
+    ├── hooks/                # 這個 feature 專屬的 custom hooks
+    │   ├── useCheckoutFlow.ts
+    │   └── usePaymentMethods.ts
+    ├── api/                  # 這個 feature 的 API 呼叫
+    │   └── checkoutApi.ts
+    ├── store/                # 這個 feature 的局部狀態（如果需要）
+    │   └── checkoutSlice.ts
+    └── types.ts              # 這個 feature 的型別定義
+```
+
+### 3.3 Feature 邊界的劃分原則
+
+**原則一：高內聚（High Cohesion）**
+
+同一個 feature 內的所有東西，應該要因為相同的原因一起改變。
+
+```
+「我要修改結帳流程」→ 只需要動 checkout/ 資料夾 ✅
+「我要修改結帳流程」→ 需要動 components/、hooks/、pages/ 好幾個地方 ❌
+```
+
+**原則二：低耦合（Low Coupling）**
+
+Feature 之間的依賴越少越好。如果 A feature 需要 B feature 的東西，優先考慮把那個東西提升到 `shared/` 層。
+
+```tsx
+// ❌ Feature 之間直接互相 import
+// features/checkout/components/CartSummary.tsx
+import { ProductCard } from '../product-catalog/components/ProductCard'
+
+// ✅ 共用的東西提升到 shared
+// shared/components/ProductCard.tsx  ← 移到這裡
+// features/checkout/components/CartSummary.tsx
+import { ProductCard } from '@/shared/components/ProductCard'
+```
+
+**原則三：Feature 只有一個對外的出口**
+
+透過 `index.ts` 控制對外暴露的介面，隱藏內部實作細節。
+
+```ts
+// features/checkout/index.ts
+// ✅ 只暴露外部真正需要的東西
+export { CheckoutPage } from './CheckoutPage'
+export type { CheckoutSummary } from './types'
+
+// ❌ 不應該暴露內部實作
+// export { useInternalCheckoutState } from './hooks/useCheckoutFlow'; // 不要這樣做
+```
+
+### 3.4 Feature 分層架構（FSD 概念）
+
+對於大型專案，可以考慮更明確的分層依賴關係：
+
+```
+pages/          → 路由入口，只組裝 feature
+  └── 依賴 features, widgets, shared
+
+widgets/        → 跨 feature 的複合 UI 區塊（如 Header, Sidebar）
+  └── 依賴 features, shared
+
+features/       → 單一業務能力
+  └── 依賴 entities, shared
+
+entities/       → 核心業務實體（User, Product, Order）
+  └── 依賴 shared
+
+shared/         → 與業務無關的通用工具
+  └── 不依賴任何層
+```
+
+**核心規則：只能往下依賴，不能往上或平行 import。**
+
+---
+
+## 4. Custom Hook 的拆分時機與設計原則
+
+### 4.1 什麼時候該建立 Custom Hook？
+
+| 時機             | 說明                                           |
+| ---------------- | ---------------------------------------------- |
+| **邏輯複用**     | 同樣的邏輯在多個 component 出現                |
+| **複雜邏輯隔離** | component 裡的邏輯太複雜，需要獨立測試         |
+| **副作用封裝**   | 封裝 useEffect 的相關邏輯，讓 component 更乾淨 |
+| **第三方整合**   | 封裝對第三方函式庫的使用細節                   |
+
+### 4.2 Hook 的設計原則
+
+**原則一：Hook 應該是動詞開頭的短句**
+
+名稱清楚表達這個 hook「做什麼」，而不是「是什麼」。
+
+```ts
+useUserProfile(userId) // ✅ 清楚
+useUser(userId) // ✅ 還好
+useData() // ❌ 太模糊
+useUserStuff() // ❌ 不知道做什麼
+```
+
+**原則二：回傳值用物件，除非只回傳一個值**
+
+```ts
+// ✅ 只有一個值，直接回傳
+function useWindowWidth() {
+  const [width, setWidth] = useState(window.innerWidth)
+  // ...
+  return width
+}
+
+// ✅ 多個值，用物件（方便解構時重命名、方便擴充）
+function useForm<T>(initialValues: T) {
+  return {
+    values,
+    errors,
+    isSubmitting,
+    handleChange,
+    handleSubmit,
+    reset,
+  }
+}
+
+// ❌ 多個值用 tuple，擴充困難且容易搞混順序
+function useForm<T>(initialValues: T): [T, Errors, boolean, Handler, Handler] {
+  // ...
+}
+```
+
+**原則三：Hook 的依賴要穩定**
+
+避免讓 hook 的 callback 參數每次都是新的 reference，否則會導致無限迴圈或非預期的 re-fetch。
+
+```ts
+// ❌ 呼叫端每次 render 都傳入新的 function，導致 hook 內部的 useEffect 一直重觸發
+function ParentComponent() {
+  useDataFetcher({
+    onSuccess: (data) => {
+      setData(data)
+    }, // 每次 render 都是新的 function
+  })
+}
+
+// ✅ 用 useCallback 穩定 reference
+function ParentComponent() {
+  const handleSuccess = useCallback((data) => {
+    setData(data)
+  }, [])
+
+  useDataFetcher({ onSuccess: handleSuccess })
+}
+```
+
+### 4.3 Hook 的職責分層範例
+
+```ts
+// Layer 1：最底層，只負責 API 通訊（可以是 TanStack Query）
+function useProductQuery(productId: string) {
+  return useQuery({
+    queryKey: ['product', productId],
+    queryFn: () => productApi.getById(productId),
+  })
+}
+
+// Layer 2：業務邏輯層，封裝資料轉換與衍生狀態
+function useProduct(productId: string) {
+  const { data, isLoading, error } = useProductQuery(productId)
+
+  const isInStock = data ? data.stock > 0 : false
+  const discountedPrice = data ? data.price * (1 - (data.discountRate ?? 0)) : 0
+
+  return { product: data, isInStock, discountedPrice, isLoading, error }
+}
+
+// Layer 3：互動邏輯層，封裝 UI 行為
+function useProductActions(productId: string) {
+  const addToCart = useMutation({ mutationFn: cartApi.addItem })
+  const toggleWishlist = useMutation({ mutationFn: wishlistApi.toggle })
+
+  const handleAddToCart = useCallback(() => {
+    addToCart.mutate({ productId, quantity: 1 })
+  }, [productId, addToCart])
+
+  return { handleAddToCart, isAddingToCart: addToCart.isPending }
+}
+```
+
+---
+
+## 5. Utility Function 的設計
+
+### 5.1 Pure Function 優先
+
+Utility function 應該是 **pure function**：相同的輸入，永遠產生相同的輸出，沒有副作用。這讓它們容易測試、容易推理。
+
+```ts
+// ✅ Pure function：結果只依賴輸入
+function formatCurrency(amount: number, currency = 'TWD'): string {
+  return new Intl.NumberFormat('zh-TW', {
+    style: 'currency',
+    currency,
+  }).format(amount)
+}
+
+// ❌ 不是 pure function：依賴外部狀態
+function formatCurrency(amount: number): string {
+  const currency = store.getState().user.preferredCurrency // 副作用！
+  return new Intl.NumberFormat('zh-TW', { style: 'currency', currency }).format(amount)
+}
+```
+
+### 5.2 函式命名的語意化
+
+函式名稱應該清楚說明「做什麼」，而不是「怎麼做」。
+
+```ts
+// ✅ 語意清楚
+function isValidEmail(email: string): boolean { ... }
+function parseQueryString(url: string): Record<string, string> { ... }
+function groupBy<T>(items: T[], key: keyof T): Record<string, T[]> { ... }
+function formatRelativeTime(date: Date): string { ... }  // "3 分鐘前"
+
+// ❌ 命名不清楚，需要看實作才知道做什麼
+function check(s: string): boolean { ... }
+function process(url: string) { ... }
+function transform<T>(items: T[], k: keyof T) { ... }
+```
+
+### 5.3 函式拆分的粒度
+
+遵循「一個函式做一件事」，但也要避免過度碎片化：
+
+```ts
+// ❌ 過度碎片化，閱讀時要跳來跳去
+function getYear(date: Date) {
+  return date.getFullYear()
+}
+function getMonth(date: Date) {
+  return date.getMonth() + 1
+}
+function getDay(date: Date) {
+  return date.getDate()
+}
+function formatDate(date: Date) {
+  return `${getYear(date)}-${getMonth(date)}-${getDay(date)}`
+}
+
+// ✅ 適當粒度，邏輯內聚
+function formatDate(date: Date, format: 'YYYY-MM-DD' | 'MM/DD/YYYY' = 'YYYY-MM-DD'): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+
+  if (format === 'MM/DD/YYYY') return `${m}/${d}/${y}`
+  return `${y}-${m}-${d}`
+}
+```
+
+---
+
+## 6. State 的歸屬與管理策略
+
+### 6.1 State 的四個層次
+
+把 state 放在「能滿足需求的最低層次」，避免不必要的全局狀態。
+
+```
+1. Server State   → 來自 API 的資料（TanStack Query / SWR）
+2. Global State   → 跨 feature 的共享狀態（Zustand / Redux）
+3. Local State    → 單一 component 的 UI 狀態（useState / useReducer）
+4. URL State      → 需要分享或書籤的狀態（query params）
+```
+
+### 6.2 State 歸屬的決策流程
+
+```
+這個 state 是 API 資料嗎？
+  → YES：用 TanStack Query，不要存進 local state
+  → NO：繼續往下判斷
+
+這個 state 需要跨多個 feature 共享嗎？
+  → YES：放進 Global State（Zustand）
+  → NO：繼續往下判斷
+
+這個 state 需要在 URL 中反映（支援分享或重新整理後保留）？
+  → YES：放進 URL（useSearchParams）
+  → NO：放在 Component Local State（useState）
+```
+
+### 6.3 實際範例：避免 Server State 重複
+
+```tsx
+// ❌ 常見的錯誤：把 API 資料同步到 local state
+function UserProfile({ userId }: { userId: string }) {
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    fetchUser(userId).then(setUser) // 需要自己處理 loading、error、cache
+  }, [userId])
+
+  return <div>{user?.name}</div>
+}
+
+// ✅ 讓 TanStack Query 管理 server state
+function UserProfile({ userId }: { userId: string }) {
+  const { data: user, isLoading } = useQuery({
+    queryKey: ['user', userId],
+    queryFn: () => fetchUser(userId),
+  })
+
+  if (isLoading) return <Skeleton />
+  return <div>{user?.name}</div>
+}
+```
+
+### 6.4 複雜 UI State 用 useReducer
+
+當一個 component 的 state 有多個子狀態且互相影響時，`useReducer` 比多個 `useState` 更清楚。
+
+```ts
+// ❌ 多個相關 state 散落各地，更新邏輯難以追蹤
+const [isOpen, setIsOpen] = useState(false)
+const [step, setStep] = useState(0)
+const [isSubmitting, setIsSubmitting] = useState(false)
+const [error, setError] = useState<string | null>(null)
+
+// ✅ 用 useReducer 集中管理，狀態轉換更清楚
+type CheckoutState =
+  | { status: 'idle' }
+  | { status: 'open'; step: number }
+  | { status: 'submitting'; step: number }
+  | { status: 'error'; step: number; message: string }
+  | { status: 'success' }
+
+type CheckoutAction =
+  | { type: 'OPEN' }
+  | { type: 'NEXT_STEP' }
+  | { type: 'SUBMIT' }
+  | { type: 'SUBMIT_SUCCESS' }
+  | { type: 'SUBMIT_FAILURE'; message: string }
+  | { type: 'CLOSE' }
+
+function checkoutReducer(state: CheckoutState, action: CheckoutAction): CheckoutState {
+  switch (action.type) {
+    case 'OPEN':
+      return { status: 'open', step: 0 }
+    case 'NEXT_STEP':
+      if (state.status !== 'open') return state
+      return { ...state, step: state.step + 1 }
+    case 'SUBMIT':
+      if (state.status !== 'open') return state
+      return { status: 'submitting', step: state.step }
+    case 'SUBMIT_SUCCESS':
+      return { status: 'success' }
+    case 'SUBMIT_FAILURE':
+      return { status: 'error', step: (state as any).step, message: action.message }
+    case 'CLOSE':
+      return { status: 'idle' }
+    default:
+      return state
+  }
+}
+```
+
+---
+
+## 7. API 層的設計
+
+### 7.1 API 函式的封裝原則
+
+把 HTTP 呼叫封裝成語意化的函式，隱藏實作細節（用 axios 還是 fetch、header 怎麼設定等）。
+
+```ts
+// api/productApi.ts
+const BASE = '/api/products'
+
+export const productApi = {
+  getAll: (params?: ProductListParams): Promise<PaginatedResponse<Product>> => apiClient.get(BASE, { params }),
+
+  getById: (id: string): Promise<Product> => apiClient.get(`${BASE}/${id}`),
+
+  create: (payload: CreateProductPayload): Promise<Product> => apiClient.post(BASE, payload),
+
+  update: (id: string, payload: UpdateProductPayload): Promise<Product> => apiClient.patch(`${BASE}/${id}`, payload),
+
+  delete: (id: string): Promise<void> => apiClient.delete(`${BASE}/${id}`),
+}
+```
+
+### 7.2 Query Key Factory
+
+使用 TanStack Query 時，統一管理 query key，避免字串散落各地、cache invalidation 出錯。
+
+```ts
+// queryKeys/productKeys.ts
+export const productKeys = {
+  all: ['products'] as const,
+  lists: () => [...productKeys.all, 'list'] as const,
+  list: (params: ProductListParams) => [...productKeys.lists(), params] as const,
+  details: () => [...productKeys.all, 'detail'] as const,
+  detail: (id: string) => [...productKeys.details(), id] as const,
+};
+
+// 使用
+useQuery({ queryKey: productKeys.detail(productId), queryFn: ... });
+
+// Invalidate 所有 product 相關 cache
+queryClient.invalidateQueries({ queryKey: productKeys.all });
+```
+
+---
+
+## 8. 常見的設計壞味道
+
+### 8.1 Props Drilling
+
+當 props 需要穿越多個中間層才能到達目標 component，是重新設計資料流的信號。
+
+**解法**：Context、狀態管理工具、或重新思考 component 組合方式。
+
+### 8.2 God Component
+
+一個 component 做太多事：取資料、處理業務邏輯、管理多個 UI 狀態、直接渲染所有 UI。
+
+**解法**：拆分成 container hook + 多個 presentational component。
+
+### 8.3 Divergent Change（發散性改變）
+
+一個模組因為不同原因被修改。例如，「換 UI 框架」和「換 API 格式」都需要修改同一個 component。
+
+**解法**：UI 邏輯與資料邏輯分離（API 層 → Hook 層 → UI 層）。
+
+### 8.4 Shotgun Surgery（霰彈槍手術）
+
+做一個小改動需要修改散落在很多地方的程式碼。
+
+**解法**：提高相關程式碼的內聚性，把「一起改變的東西放在一起」。
+
+### 8.5 Premature Abstraction（過早抽象）
+
+只有一個使用案例就建立「通用」抽象，結果 props 越來越多、越來越難用。
+
+**解法**：等到**至少有兩個以上**具體使用案例再抽象（Rule of Three）。
+
+---
+
+## 9. 決策速查表
+
+### 我應該建立新的 component 嗎？
+
+```
+JSX 超過 100 行？          → 考慮拆分
+這段 JSX 在多處出現？      → 應該拆分成 component
+這段邏輯可以獨立測試嗎？   → 考慮拆分
+這段 UI 有自己的狀態？     → 考慮拆分
+```
+
+### 我應該建立 custom hook 嗎？
+
+```
+相同邏輯在多個 component？ → 應該建立 hook
+useEffect 超過 20 行？     → 應該封裝進 hook
+component 超過 3 個 useState？ → 考慮移到 hook
+需要獨立測試這段邏輯？    → 應該建立 hook
+```
+
+### 這個 state 該放哪裡？
+
+```
+來自 API？                 → TanStack Query
+跨 feature 共享？          → Zustand / Global Store
+需要 URL 保存？            → useSearchParams
+只有一個 component 用？    → useState / useReducer
+```
+
+### 這個東西該放在哪個資料夾？
+
+```
+只有這個 feature 用？      → feature/ 內部
+多個 feature 共用？        → shared/
+業務核心資料模型？         → entities/
+頁面路由入口？             → pages/
+```
+
+---
+
+## 結語
+
+好的 React 設計沒有一套放諸四海皆準的規則，但有一個核心思維是一致的：
+
+> **讓改變變得容易。**
+
+一個設計好不好，最直觀的測試就是：「當需求改變時，我需要動多少個地方？改動一個地方會不會意外影響其他地方？」
+
+從這個角度出發——高內聚、低耦合、清楚的邊界、明確的責任——你會自然而然做出好的設計決策。

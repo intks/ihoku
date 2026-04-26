@@ -1,0 +1,275 @@
+# TypeScript 泛型（Generics）：是什麼、為什麼需要、怎麼用
+
+> 參考：[TypeScript Generics — YouTube](https://www.youtube.com/watch?v=aBp58OHA_oM)
+
+---
+
+## 為什麼需要泛型？
+
+先看一個沒有泛型的世界。
+
+你有一個「回傳傳入值」的函式，但每種型別都要寫一次：
+
+```ts
+function getStringItem(item: string): string {
+  return item
+}
+
+function getNumberItem(item: number): number {
+  return item
+}
+
+function getBooleanItem(item: boolean): boolean {
+  return item
+}
+```
+
+三個函式，邏輯完全一樣，只有型別不同。這違反了 **DRY 原則（Don't Repeat Yourself）**。
+
+你可能會想用聯集類型（union type）解決：
+
+```ts
+function getItem(item: string | number | boolean): string | number | boolean {
+  return item
+}
+```
+
+但這樣又失去型別資訊——TypeScript 不再知道「傳入 `string` 時，回傳也是 `string`」，輸入與輸出的型別關聯斷掉了：
+
+```ts
+const result = getItem('hello')
+// result 的型別是 string | number | boolean，不是 string
+// 你沒辦法直接用 result.toUpperCase()，需要額外的 type narrowing
+```
+
+**泛型就是為了解這個問題**：寫一份邏輯，支援多種型別，但型別資訊完整保留。
+
+---
+
+## 基本語法：型別佔位符 `T`
+
+在函式名稱後加上 `<T>`，`T` 就是「型別佔位符」，呼叫時才決定它是什麼：
+
+```ts
+function getItem<T>(item: T): T {
+  return item
+}
+```
+
+使用方式：
+
+```ts
+// 方式一：讓 TypeScript 自動推斷（最常用）
+const str = getItem('hello') // T 推斷為 string
+const num = getItem(42) // T 推斷為 number
+
+// 方式二：顯式指定型別（推斷不夠明確時使用）
+const str = getItem<string>('hello')
+const num = getItem<number>(42)
+```
+
+兩種方式效果相同，顯式指定讓型別關係更清楚，但大多數情況下 TypeScript 能自動推斷，不需要手動寫。
+
+---
+
+## 泛型約束（Constraints）：限制可用的型別
+
+有時候你不想讓 `T` 可以是任何東西，這時用 `T extends ...` 加上約束。
+
+### 限制為特定型別
+
+```ts
+// 只允許 string、number、boolean，不允許陣列、物件等
+function getItem<T extends string | number | boolean>(item: T): T {
+  return item
+}
+
+getItem('hello') // ✅
+getItem(42) // ✅
+getItem(['a', 'b']) // ❌ 型別錯誤
+```
+
+### 限制為有特定結構的物件
+
+```ts
+// 保證傳入的物件一定有 name 欄位
+function printName<T extends { name: string }>(item: T): void {
+  console.log(item.name)
+}
+
+printName({ name: 'Alice', age: 30 }) // ✅
+printName({ age: 30 }) // ❌ 缺少 name
+```
+
+約束的作用：既保留泛型的彈性，又在編譯期擋掉不合理的用法。
+
+---
+
+## 實戰場景：共用 API fetch 邏輯
+
+最常見的實際應用。沒有泛型時，每個資源都要寫一個 fetch 函式：
+
+```ts
+// ❌ 重複的邏輯
+async function getUsers(): Promise<User[]> {
+  const res = await fetch('/api/users')
+  return res.json()
+}
+
+async function getTodos(): Promise<Todo[]> {
+  const res = await fetch('/api/todos')
+  return res.json()
+}
+
+async function getPosts(): Promise<Post[]> {
+  const res = await fetch('/api/posts')
+  return res.json()
+}
+```
+
+用泛型重構成一個通用函式：
+
+```ts
+// ✅ 一個函式，支援所有資源型別
+async function getItems<T>(url: string): Promise<T[]> {
+  const res = await fetch(url)
+  return res.json()
+}
+
+// 使用時指定型別，享有完整型別安全
+const users = await getItems<User>('/api/users')
+const todos = await getItems<Todo>('/api/todos')
+const posts = await getItems<Post>('/api/posts')
+
+// TypeScript 現在知道：
+// users 是 User[]
+// todos 是 Todo[]
+// 你可以直接用 users[0].email、todos[0].completed 等
+```
+
+---
+
+## 多型別參數
+
+一個泛型函式可以同時有多個型別參數，常見於需要描述「輸入與輸出型別不同」或「兩個輸入之間有關聯」的情境：
+
+```ts
+function pair<K, V>(key: K, value: V): [K, V] {
+  return [key, value]
+}
+
+const result = pair('id', 123)
+// result 的型別是 [string, number]
+```
+
+也可以對其中一個加約束，另一個保持彈性：
+
+```ts
+function pair<K extends string, V>(key: K, value: V): [K, V] {
+  return [key, value]
+}
+
+pair('name', 'Alice') // ✅ K 是 string
+pair('count', 42) // ✅ V 可以是任何型別
+pair(123, 'Alice') // ❌ K 必須是 string
+```
+
+---
+
+## 在 React 中：`useState` 本身就是泛型
+
+`useState` 的型別簽名就是 `useState<S>(initialState: S): [S, Dispatch<SetStateAction<S>>]`，所以你一直在用泛型，只是可能沒意識到。
+
+```ts
+// ❌ 不指定泛型：TypeScript 從初始值推斷
+const [user, setUser] = useState(null)
+// user 的型別是 null，不是 User | null
+// 之後 setUser(fetchedUser) 會報錯
+
+// ✅ 明確指定泛型：型別正確
+const [user, setUser] = useState<User | null>(null)
+// user 的型別是 User | null
+// setUser(fetchedUser) ✅、setUser(null) ✅
+```
+
+其他常見例子：
+
+```ts
+const [count, setCount] = useState<number>(0)
+const [name, setName] = useState<string>('')
+const [items, setItems] = useState<string[]>([])
+const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle')
+```
+
+初始值是空陣列 `[]` 或 `null` 時，TypeScript 無法從初始值推斷出正確型別，這時一定要顯式指定。
+
+---
+
+## 泛型介面與型別
+
+泛型不只用在函式，也可以定義在 interface 或 type 上：
+
+```ts
+// 泛型 interface：描述 API 回應的通用結構
+interface ApiResponse<T> {
+  data: T
+  status: number
+  message: string
+}
+
+// 使用時帶入具體型別
+type UserResponse = ApiResponse<User>
+type TodoListResponse = ApiResponse<Todo[]>
+
+// 範例資料
+const response: ApiResponse<User> = {
+  data: { id: 1, name: 'Alice' },
+  status: 200,
+  message: 'ok',
+}
+```
+
+---
+
+## 常見命名慣例
+
+泛型參數名稱沒有強制規定，但有一些約定俗成的習慣：
+
+| 名稱 | 常見用途                  |
+| ---- | ------------------------- |
+| `T`  | Type，最通用的佔位符      |
+| `K`  | Key，常用於物件的 key     |
+| `V`  | Value，常用於物件的 value |
+| `E`  | Element，常用於陣列元素   |
+| `R`  | Return，表示回傳型別      |
+
+如果泛型的語意很清楚，也可以直接用有意義的名稱（例如 `TData`、`TError`），可讀性更好。
+
+---
+
+## 什麼時候用泛型？
+
+| 情境                                  | 建議                |
+| ------------------------------------- | ------------------- |
+| 相同邏輯，要對不同型別重複            | ✅ 用泛型           |
+| 函式的輸入與輸出型別有關聯            | ✅ 用泛型           |
+| API fetch / data transform 的通用邏輯 | ✅ 用泛型           |
+| `useState` 初始值是 `null` 或 `[]`    | ✅ 顯式指定泛型     |
+| 型別只有一種，不需要重複使用          | ❌ 不需要泛型       |
+| 任何型別都可以接受、沒有型別約束需求  | ❌ 考慮用 `unknown` |
+
+---
+
+## 小結
+
+泛型的核心概念只有一句話：
+
+> **「型別也可以當參數傳，讓一份邏輯支援多種型別，同時保有型別安全。」**
+
+日常開發中最常用到的場景不外乎：
+
+- 通用的 API fetch 函式 → `getItems<T>(url): Promise<T[]>`
+- 通用的資料轉換 / 包裝 → `ApiResponse<T>`、`pair<K, V>`
+- React state 型別 → `useState<T>(initialValue)`
+
+不需要追求複雜的泛型寫法，掌握這些基本用法就能應付大部分的日常需求。

@@ -1,0 +1,276 @@
+# 封印 useEffect：一個激進但實用的 React 工程原則
+
+> 本文整理自：[@alvinsng — 原文連結](https://x.com/alvinsng/article/2033969062834045089)
+
+---
+
+作者在 Factory 公司推行了一個激進的決策：**幾乎完全封印 `useEffect`**，只保留一個包裝過的 `useMountEffect`，其餘情況一律改用更明確的模式。
+
+這不是一開始就這樣設計的，而是一路被線上事故教出來的。
+
+---
+
+## 為什麼要封印 `useEffect`？
+
+### 1. 脆弱性（Brittleness）
+
+dependency array 會把耦合關係藏起來。你 refactor 某段看起來無關的程式碼時，可能悄悄改變了某個 effect 的觸發時機，而 TypeScript / ESLint 都不會擋下「語意上的錯」。
+
+### 2. 無限迴圈（Infinite Loops）
+
+`setState → render → effect → setState → render` 的循環很容易發生，尤其是工程師「看到警告就亂加依賴」時，bug 非常隱性。
+
+### 3. 依賴地獄（Dependency Hell）
+
+當你有一串 effect：A 改 state → 觸發 B 的 effect → 改另一個 state → 再觸發 C……控制流程變成「依時間順序執行的一堆 effect」，幾乎無法追蹤。
+
+### 4. 除錯痛苦（Debugging Pain）
+
+你會一直問「為什麼這個 effect 有跑？」或「為什麼這次沒跑？」而不是像事件處理一樣，有一個清楚的觸發入口。
+
+### 5. AI 時代的額外風險
+
+AI agent 很常「為了保險」加上 useEffect，結果為 race condition、無限迴圈、閃爍行為埋雷。
+
+> React 官方也意識到這個問題，才有了 [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect) 這份指南。
+
+---
+
+## 核心規則：只留一個出口
+
+```ts
+// 禁止在元件裡直接呼叫 useEffect
+// 需要用，只能透過這個 hook
+function useMountEffect(callback: () => void | (() => void)) {
+  useEffect(callback, [])
+}
+```
+
+語意清楚：這段只會在**元件掛載時跑一次**（如果有回傳 cleanup，則在 unmount 時執行）。配合 lint rule，可以直接封鎖所有裸用的 `useEffect`。
+
+---
+
+## 五個替代模式
+
+### 規則一：推導狀態，不要「同步」狀態
+
+**❌ 錯誤：用 effect 鏡射另一個 state**
+
+```tsx
+const [products, setProducts] = useState<Product[]>([])
+const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
+
+useEffect(() => {
+  setFilteredProducts(products.filter((p) => p.inStock))
+}, [products])
+// 問題：每次 products 改變都會多觸發一次 render
+```
+
+**✅ 正確：在 render 裡直接推導**
+
+```tsx
+const [products, setProducts] = useState<Product[]>([])
+const filteredProducts = products.filter((p) => p.inStock) // 不需要 state，不需要 effect
+```
+
+同理，小計、稅額、總額這種衍生值也不應該各用一個 state 再靠 effect 同步：
+
+```tsx
+// ❌
+const [subtotal, setSubtotal] = useState(0)
+const [tax, setTax] = useState(0)
+const [total, setTotal] = useState(0)
+
+useEffect(() => {
+  setTax(subtotal * 0.05)
+  setTotal(subtotal + tax)
+}, [subtotal])
+
+// ✅
+const [subtotal, setSubtotal] = useState(0)
+const tax = subtotal * 0.05
+const total = subtotal + tax
+```
+
+**Smell test：**
+
+- 你正要寫 `useEffect(() => setX(deriveFromY(y)), [y])`
+- 你有一個 state，內容只是其他 state 或 props 的鏡像
+
+這兩種情況幾乎都該改成「推導，而不是同步」。
+
+---
+
+### 規則二：資料讀取交給 fetch / query library
+
+**❌ 錯誤：在 effect 裡手動 fetch**
+
+```tsx
+const [product, setProduct] = useState(null)
+
+useEffect(() => {
+  fetchProduct(productId).then(setProduct)
+}, [productId])
+// 沒有處理競態、沒有 cache、沒有 retry、沒有取消請求
+```
+
+**✅ 正確：交給 React Query**
+
+```tsx
+const { data: product } = useQuery({
+  queryKey: ['product', productId],
+  queryFn: () => fetchProduct(productId),
+})
+// 競態、cache、retry、stale 處理全部內建
+```
+
+**Smell test：**
+
+- 在 effect 裡做 `fetch(...)` 然後 `setState(...)`
+- 你自己在實作 cache、retry、取消或 stale 處理
+
+遇到這種情況，優先考慮 query library，而不是手工 useEffect。
+
+---
+
+### 規則三：用事件處理器，不要用 effect 當中介
+
+**❌ 錯誤：把 state 當旗子，讓 effect 去觸發 side effect**
+
+```tsx
+const [liked, setLiked] = useState(false)
+
+useEffect(() => {
+  if (liked) {
+    postLike().then(() => setLiked(false))
+  }
+}, [liked])
+
+return <button onClick={() => setLiked(true)}>Like</button>
+```
+
+**✅ 正確：直接在事件 handler 裡呼叫**
+
+```tsx
+return <button onClick={() => postLike()}>Like</button>
+```
+
+**Smell test：**
+
+- 你把某個 state 拿來當「旗子」，effect 負責真正的 side effect
+- 你有「set flag → effect 跑 → reset flag」這種機制
+
+這幾乎都該改成明確的事件處理函式。
+
+---
+
+### 規則四：掛載時與外部系統同步，用 `useMountEffect` + 條件渲染
+
+適合 `useMountEffect` 的情境：
+
+- DOM 整合（自動 focus、scroll）
+- 第三方 widget 初始化 / 清理
+- 瀏覽器 API 訂閱（WebSocket、EventSource、window 事件）
+
+關鍵是**讓父層透過條件渲染控制掛載時機**，而不是在 effect 裡加 if 判斷。
+
+**❌ 錯誤：在 effect 裡等待條件**
+
+```tsx
+function VideoPlayer({ isLoading }: { isLoading: boolean }) {
+  useEffect(() => {
+    if (!isLoading) {
+      playVideo() // 等 isLoading 變 false 才執行
+    }
+  }, [isLoading])
+}
+```
+
+**✅ 正確：父層控制掛載，子層只管自己的初始化**
+
+```tsx
+function VideoPlayerWrapper({ isLoading }: { isLoading: boolean }) {
+  if (isLoading) return <LoadingScreen />
+  return <VideoPlayer /> // loading 結束才掛載
+}
+
+function VideoPlayer() {
+  useMountEffect(() => {
+    playVideo() // 掛載時一定滿足前置條件，直接執行
+  })
+}
+```
+
+這讓「什麼時候初始化外部系統」這件事，變成元件樹和條件渲染就能回答的問題，而不是藏在 dependency array 裡。
+
+**Smell test：**
+
+- 你在「跟外部系統同步」（DOM、SDK、訂閱）
+- 這個行為本質就是「掛載時 setup，卸載時 cleanup」
+
+---
+
+### 規則五：用 `key` 讓 React remount，不要用 effect 模擬重置
+
+**❌ 錯誤：用 effect 監看 id 變化，手動重置狀態**
+
+```tsx
+function VideoPlayer({ videoId }: { videoId: string }) {
+  useEffect(() => {
+    loadVideo(videoId) // videoId 改變時重新載入
+  }, [videoId])
+}
+```
+
+**✅ 正確：父層用 key 驅動 remount**
+
+```tsx
+// 父層
+;<VideoPlayer key={videoId} videoId={videoId} />
+
+// VideoPlayer 自己只需要知道「掛載時載入」
+function VideoPlayer({ videoId }: { videoId: string }) {
+  useMountEffect(() => {
+    loadVideo(videoId)
+  })
+}
+```
+
+每次 `videoId` 改變，React 直接把整個 `VideoPlayer` 當新元件掛載，行為乾淨且可預期。
+
+**Smell test：**
+
+- 你的 effect 唯一工作就是在某個 id / prop 改變時把本地 state 重設
+- 你其實希望「每個 id 就像是新的元件實例」
+
+---
+
+## 為什麼這樣做會讓架構變好？
+
+封印 `useEffect` 是一種「逼你設計好架構」的強制手段：
+
+- **父元件**自然成為 orchestrator，負責「誰什麼時候掛載、什麼時候卸載」
+- **子元件**可以假設「前置條件都滿足了」，只專注在自身的 UI 與行為
+- **控制流程**沿著 component tree 和事件 handler 就能走完，不再散落在一堆 effect 之中
+
+這有點像 Unix 哲學：每個 component 做一件事，協調發生在清晰的邊界上，而不是透過隱性的 side effects 串起來。
+
+---
+
+## 實際觀察到的效益
+
+在大規模專案中推行後，他們看到明顯改變：
+
+- 無限迴圈類 bug 減少
+- Race condition / 微妙時間差 bug 減少
+- 新人 onboarding 速度變快，控制流程幾乎都能靠「誰 render 誰」「誰處理哪個事件」來理解
+
+---
+
+## 結論
+
+`useMountEffect` 的錯誤通常是「要嘛有跑，要嘛沒跑」——很吵、很明顯。反之，滿地裸用 `useEffect` 的 codebase，問題常常是**慢慢變壞**：偶發 bug、效能退化、行為不穩定，最後才炸成明顯故障。
+
+既然無法完全避免 bug，那就**選擇一種比較容易被發現、比較容易除錯的 bug 型態**。
+
+實施方式也不複雜：用 lint 規則封鎖直接呼叫的 `useEffect`、對 AI agent 明確給定這份規範，再把現有 codebase 的 `useEffect` 逐一用這五個模式替換掉。門檻不高，但對長期維護的幫助很實際。
